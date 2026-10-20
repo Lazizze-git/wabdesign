@@ -6,7 +6,7 @@ les espacements, les arrondis et les textes, et tu vois le résultat tout de sui
 Quand le résultat te plaît, « Valider » demande à [Claude Code](https://claude.com/claude-code)
 de reporter les modifications dans le code du projet.
 
-![Le panneau wabdesign ouvert sur une preview locale](docs/apercu.png)
+![Le panneau wabdesign ouvert sur le site du studio WeAreBrothers : l’onglet Design system liste ses 144 variables CSS](docs/apercu.jpg)
 
 Conçu pour travailler avec Claude Code : tu lui demandes un site, il lance la preview, tu tapes
 `/wabdesign`, tu ajustes le design à la main, il l’applique dans le code.
