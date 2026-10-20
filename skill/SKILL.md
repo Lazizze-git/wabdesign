@@ -21,7 +21,7 @@ c'est bien `wabdesign` pour ce projet, puis arrête-le. Confirme en une phrase. 
 ## Sinon : ouvrir le panneau
 
 1. **Vérifier que l'outil est installé** : `command -v wabdesign`.
-   S'il manque, proposer de l'installer (`npm install -g github:Lazizze-git/wabdesign`, Node 20 ou plus)
+   S'il manque, proposer de l'installer (`npm install -g https://github.com/Lazizze-git/wabdesign/releases/latest/download/wabdesign.tgz`, Node 20 ou plus)
    et l'installer si l'utilisateur accepte.
 
 2. **Lancer l'outil dans le dossier du projet**, en tâche de fond (`run_in_background: true`) :

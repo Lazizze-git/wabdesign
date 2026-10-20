@@ -29,7 +29,7 @@ si tu recharges la page ou relances l’outil.
 Il faut [Node.js](https://nodejs.org) 20 ou plus récent.
 
 ```bash
-npm install -g github:Lazizze-git/wabdesign
+npm install -g https://github.com/Lazizze-git/wabdesign/releases/latest/download/wabdesign.tgz
 wabdesign setup
 ```
 
@@ -115,9 +115,12 @@ Conseil : sauvegarde ton projet avec Git avant de valider, pour pouvoir revenir 
 ## Mettre à jour, désinstaller
 
 ```bash
-npm install -g github:Lazizze-git/wabdesign   # mettre à jour
-npm uninstall -g wabdesign                      # désinstaller
-rm -rf ~/.claude/skills/wabdesign               # retirer la commande /wabdesign
+# mettre à jour (même commande que l’installation)
+npm install -g https://github.com/Lazizze-git/wabdesign/releases/latest/download/wabdesign.tgz
+
+# désinstaller
+npm uninstall -g wabdesign
+rm -rf ~/.claude/skills/wabdesign
 ```
 
 ## Contribuer
@@ -131,6 +134,9 @@ npm run check    # types, règles de code, tests
 npm run build    # régénère dist/ (à inclure dans le commit)
 ```
 
+Publier une version : monter `version` dans `package.json`, `npm run build`, commit, puis
+`npm pack` et joindre le fichier renommé `wabdesign.tgz` à une release GitHub (`gh release create vX.Y.Z wabdesign.tgz`).
+
 Le code est en TypeScript : le serveur relais dans `src/server`, le panneau (Preact, dans un
 Shadow DOM) dans `src/client`. Les choix visuels du panneau sont expliqués dans `DESIGN.md`.
 
@@ -139,7 +145,7 @@ Shadow DOM) dans `src/client`. Les choix visuels du panneau sont expliqués dans
 wabdesign overlays a design panel on your local dev preview. Try fonts (your own files or
 Google Fonts), colors, design-system CSS variables, spacing, radius and copy live, then click
 « Valider » to have Claude Code apply the changes to your source code. Install with
-`npm install -g github:Lazizze-git/wabdesign && wabdesign setup`, then type `/wabdesign` in
+`npm install -g https://github.com/Lazizze-git/wabdesign/releases/latest/download/wabdesign.tgz && wabdesign setup`, then type `/wabdesign` in
 Claude Code or run `wabdesign` in your project folder. The panel UI is in French.
 
 ## Licence
