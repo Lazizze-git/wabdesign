@@ -1,0 +1,7 @@
+# ID | fichier concerné (ou *) | raison et source
+CT-03b | src/client/ui/styles/controls.ts | Damier de transparence derrière les pastilles de couleur : fonction (montrer qu'une couleur est transparente), pas une décoration. DESIGN.md, section Couleur.
+CT-20b | * | Interface d'outil injectée dans les sites clients : police du système pour ne charger aucune fonte dans la page qu'on juge (sinon les essais de polices sont faussés). DESIGN.md, section Typographie. Arial et system-ui dans les tests et en dernier repli seulement.
+CT-24 | src/client/ui/fonts/WeightControl.tsx | Bouton « I » qui active l'italique : le glyphe montre la fonction du bouton, ce n'est pas un titre.
+CT-28 | src/client/ui/styles/base.ts | Chasse fixe réservée aux vraies données : valeurs CSS, sélecteurs, couleurs hex (DESIGN.md, Typographie).
+CO-07 | src/client/ui/styles/base.ts | Verre dépoli demandé par écrit par Eliott le 20.10.2026 (« fais le un peu en verre dépoli »). Fond du site éclairci avant le flou : le cadre ne descend jamais sous #b1aebc (Lc ≥ 60 vérifié sur site blanc, noir, bleu, rouge). Opaque si transparence réduite.
+CT-28 | src/client/ui/styles/controls.ts | Noms techniques des variables CSS (--radius…) affichés à côté du nom lisible : ce sont des données de code. DESIGN.md, Typographie.

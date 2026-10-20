@@ -1,0 +1,26 @@
+# encre sur cadre #b1aebc (libellés, titres de section, onglets inactifs)
+rgb(20 19 24) | rgb(177 174 188) | contenu
+# encre sur surface claire #dcdae2 (valeurs, champs, listes)
+rgb(20 19 24) | rgb(220 218 226) | courant
+# texte secondaire sur surface claire
+rgb(61 58 74) | rgb(220 218 226) | contenu
+# placeholder / unités sur surface claire
+rgb(86 82 106) | rgb(220 218 226) | placeholder
+# encre sur surface active #efeef3 (onglet actif, segment actif)
+rgb(20 19 24) | rgb(239 238 243) | courant
+# bouton principal : texte clair sur encre
+rgb(243 242 246) | rgb(20 19 24) | courant
+# accent (sélection, focus, modifié) sur cadre et sur surface
+rgb(10 63 184) | rgb(177 174 188) | ui
+rgb(10 63 184) | rgb(220 218 226) | ui
+# danger et succès sur surface claire
+rgb(122 30 16) | rgb(220 218 226) | contenu
+rgb(11 74 42) | rgb(220 218 226) | contenu
+# toast d'erreur
+rgb(243 242 246) | rgb(122 30 16) | contenu
+# bord des surfaces contre le cadre
+rgb(90 86 107) | rgb(177 174 188) | ui
+rgb(20 19 24) | rgb(177 174 188) | ui
+# verre dépoli : pire cas (site noir derrière) et meilleur cas (site blanc)
+rgb(20 19 24) | rgb(177 175 185) | contenu
+rgb(20 19 24) | rgb(200 198 208) | contenu

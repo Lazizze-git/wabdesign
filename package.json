@@ -1,0 +1,61 @@
+{
+  "name": "wabdesign",
+  "version": "1.0.0",
+  "description": "Panneau de design en direct par-dessus la preview locale de ton site : polices, couleurs, design system, textes. Les modifications validées sont appliquées dans le code par Claude Code.",
+  "type": "module",
+  "bin": {
+    "wabdesign": "./bin/design.js",
+    "design": "./bin/design.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "skill",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lazizze-git/wabdesign.git"
+  },
+  "homepage": "https://github.com/Lazizze-git/wabdesign#readme",
+  "license": "MIT",
+  "author": "Eliott Pina",
+  "keywords": [
+    "design",
+    "claude-code",
+    "live-editing",
+    "fonts",
+    "design-system",
+    "preview"
+  ],
+  "scripts": {
+    "build": "node scripts/build.ts",
+    "dev": "node scripts/build.ts --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run lint && npm run test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@preact/signals": "^2.11.3",
+    "@types/fontkit": "^2.0.9",
+    "@types/http-proxy": "^1.17.17",
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.13.0",
+    "fontkit": "^2.0.4",
+    "happy-dom": "^21.0.3",
+    "http-proxy": "^1.18.1",
+    "jiti": "^2.7.0",
+    "preact": "^11.0.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^5.0.5",
+    "zod": "^4.6.7"
+  }
+}

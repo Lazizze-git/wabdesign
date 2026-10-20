@@ -1,0 +1,33 @@
+Bundled license information:
+
+http-proxy/lib/http-proxy/passes/web-outgoing.js:
+http-proxy/lib/http-proxy/passes/web-incoming.js:
+  /*!
+   * Array of passes.
+   *
+   * A `pass` is just a function that is executed on `req, res, options`
+   * so that you can easily add new checks while still keeping the base
+   * flexible.
+   */
+
+http-proxy/lib/http-proxy/passes/ws-incoming.js:
+  /*!
+   * Array of passes.
+   *
+   * A `pass` is just a function that is executed on `req, socket, options`
+   * so that you can easily add new checks while still keeping the base
+   * flexible.
+   */
+
+http-proxy/index.js:
+  /*!
+   * Caron dimonio, con occhi di bragia
+   * loro accennando, tutte le raccoglie;
+   * batte col remo qualunque s’adagia 
+   *
+   * Charon the demon, with the eyes of glede,
+   * Beckoning to them, collects them all together,
+   * Beats with his oar whoever lags behind
+   *          
+   *          Dante - The Divine Comedy (Canto III)
+   */
