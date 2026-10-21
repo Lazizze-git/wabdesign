@@ -2,7 +2,7 @@ import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { humanLabel } from "../engine/selector";
 import { highlightSelector, hovered, inspecting, selected } from "../state/inspector";
-import { getHost } from "../state/ui";
+import { activeTab, getHost } from "../state/ui";
 
 interface Box {
   key: string;
@@ -29,7 +29,8 @@ function measure(): Box[] {
   if (hover?.isConnected && !host?.contains(hover)) {
     boxes.push({ key: "hover", rect: hover.getBoundingClientRect(), label: humanLabel(hover), secondary: false });
   }
-  const current = selected.value;
+  // Le cadre de l’élément sélectionné ne reste affiché que dans l’onglet Inspecter.
+  const current = activeTab.value === "inspect" ? selected.value : null;
   if (current?.isConnected && current !== hover) {
     boxes.push({ key: "selected", rect: current.getBoundingClientRect(), label: null, secondary: false });
   }
@@ -42,7 +43,7 @@ function measure(): Box[] {
 /** Cadres bleus dans la page : élément survolé, élément sélectionné, éléments visés par une modification. */
 export function Highlights(): JSX.Element | null {
   const [boxes, setBoxes] = useState<Box[]>([]);
-  const active = inspecting.value || selected.value !== null || highlightSelector.value !== null;
+  const active = inspecting.value || (selected.value !== null && activeTab.value === "inspect") || highlightSelector.value !== null;
 
   useEffect(() => {
     if (!active) {

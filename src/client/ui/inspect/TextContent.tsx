@@ -1,3 +1,4 @@
+import { stopInspecting } from "../../state/inspector";
 import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
@@ -43,6 +44,7 @@ export function TextContent({ element }: { element: Element }): JSX.Element | nu
 
   const startInPage = (): void => {
     if (!(element instanceof HTMLElement)) return;
+    stopInspecting(); // Les clics doivent placer le curseur dans le texte, pas sélectionner.
     setInPage(true);
     editInPage(element, setText, () => setInPage(false));
   };

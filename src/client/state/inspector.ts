@@ -67,13 +67,13 @@ function block(event: Event): void {
 function onClick(event: MouseEvent): void {
   if (isOwn(event)) return;
   block(event);
+  // Le mode sélection reste actif : on clique un élément, puis un autre, comme dans Figma.
   const element = elementFrom(event);
   if (element) select(element);
-  stopInspecting();
 }
 
 function onKey(event: KeyboardEvent): void {
-  if (event.key === "Escape") stopInspecting();
+  if (event.key === "Escape") clearInspection();
 }
 
 const BLOCKED = ["pointerdown", "mousedown", "pointerup", "mouseup", "dblclick", "submit"] as const;
@@ -94,6 +94,12 @@ export function stopInspecting(): void {
   window.removeEventListener("click", onClick, true);
   window.removeEventListener("keydown", onKey, true);
   for (const type of BLOCKED) window.removeEventListener(type, block, true);
+}
+
+/** Échap : quitte le mode sélection et désélectionne, d’un seul geste. */
+export function clearInspection(): void {
+  stopInspecting();
+  select(null);
 }
 
 export function select(element: Element | null): void {

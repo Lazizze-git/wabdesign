@@ -4,11 +4,11 @@ import { defineMessages } from "../define";
 export const inspectText = defineMessages(
   {
     "inspect.pick": "Sélectionner un élément",
-    "inspect.picking": "Clique un élément dans la page… (Échap)",
+    "inspect.picking": "Clique les éléments de la page… (Échap pour finir)",
     "inspect.intro":
-      "Clique un bouton, un titre, un bloc… puis règle son texte, sa police, ses couleurs, son arrondi et ses espacements. Tu choisis ensuite si ça s’applique à cet élément seulement ou à tous les éléments du même genre.",
+      "Clique un bouton, un titre, un bloc… puis règle son texte, sa police, ses couleurs, son arrondi et ses espacements. Tu choisis ensuite si ça s’applique à cet élément seulement ou à tous les éléments du même genre. Échap pour désélectionner.",
     "inspect.parent": "Sélectionner le parent",
-    "inspect.deselect": "Désélectionner",
+    "inspect.deselect": "Désélectionner (Échap)",
     "inspect.scope": "Portée",
     "inspect.scopeElement": "Cet élément",
     "inspect.scopeSimilar": "Similaires",
@@ -60,11 +60,11 @@ export const inspectText = defineMessages(
   },
   {
     "inspect.pick": "Select an element",
-    "inspect.picking": "Click an element on the page… (Esc)",
+    "inspect.picking": "Click elements on the page… (Esc to finish)",
     "inspect.intro":
-      "Click a button, a heading, a block… then adjust its text, font, colors, radius and spacing. You then choose whether it applies to this element only or to every element of the same kind.",
+      "Click a button, a heading, a block… then adjust its text, font, colors, radius and spacing. You then choose whether it applies to this element only or to every element of the same kind. Esc to deselect.",
     "inspect.parent": "Select the parent",
-    "inspect.deselect": "Deselect",
+    "inspect.deselect": "Deselect (Esc)",
     "inspect.scope": "Scope",
     "inspect.scopeElement": "This element",
     "inspect.scopeSimilar": "Similar",

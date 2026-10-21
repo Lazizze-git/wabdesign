@@ -1,5 +1,5 @@
 import { redo, showOriginal, undo } from "./state/changes";
-import { startInspecting } from "./state/inspector";
+import { clearInspection, inspecting, selected, startInspecting } from "./state/inspector";
 import { activeTab, getHost, hidden, minimized, rememberUi } from "./state/ui";
 
 /** Vrai si l'utilisateur tape dans un champ du site (on ne lui vole pas ses raccourcis). */
@@ -15,7 +15,16 @@ function isTypingInPanel(event: KeyboardEvent): boolean {
   return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
 }
 
+/** Une liste de polices ou un choix de couleur ouvert gère lui-même Échap (il se ferme). */
+function panelOverlayOpen(): boolean {
+  return getHost()?.shadowRoot?.querySelector(".popover, .sheet") != null;
+}
+
 function onKeyDown(event: KeyboardEvent): void {
+  if (event.key === "Escape" && selected.value && !inspecting.value && !panelOverlayOpen() && !isTypingInPage(event) && !isTypingInPanel(event)) {
+    clearInspection();
+    return;
+  }
   // event.code : indépendant du caractère produit par Option (∂, ß, å…).
   if (event.altKey && !event.metaKey && !event.ctrlKey) {
     if (event.code === "KeyD") {

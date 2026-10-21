@@ -1,6 +1,6 @@
 import { t } from "../../i18n";
 import type { JSX } from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { useLayoutEffect, useState } from "preact/hooks";
 import { parseColor, toHex } from "../../engine/colors";
 import { config } from "../../state/library";
 import { Swatch } from "./Swatch";
@@ -20,7 +20,8 @@ export function ColorPopover({ value, onChange, onClose, onReset }: ColorPopover
   const hex = parsed ? toHex({ ...parsed, a: 1 }) : "#000000";
   const palettes = config.value?.palettes ?? [];
 
-  useEffect(() => {
+  // useLayoutEffect : Échap fonctionne dès l’ouverture, sans attendre le rendu suivant.
+  useLayoutEffect(() => {
     const onKey = (event: KeyboardEvent): void => {
       if (event.key === "Escape") onClose();
     };

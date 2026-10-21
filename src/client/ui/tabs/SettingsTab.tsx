@@ -108,6 +108,7 @@ function ShortcutsSection(): JSX.Element {
     [t("settings.toggle"), `${alt}D`],
     [t("settings.undoRedo"), IS_MAC ? "⌘ Z / ⇧ ⌘ Z" : "Ctrl + Z / Ctrl + Shift + Z"],
     [t("settings.pick"), `${alt}S`],
+    [t("settings.deselect"), IS_MAC ? "esc" : "Esc"],
     [t("settings.original"), `${alt}A`],
   ];
   return (
