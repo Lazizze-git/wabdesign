@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { FontAxis, FontFaceInfo, FontFamily } from "../../shared/types";
+import { LocalizedError } from "../i18n";
 import { readJson, writeJson } from "../json-file";
 import { GOOGLE_CACHE_FILE } from "../paths";
 
@@ -58,7 +59,7 @@ export function toFontFamily(entry: GoogleEntry): FontFamily {
 
 async function download(): Promise<FontFamily[]> {
   const response = await fetch(METADATA_URL, { signal: AbortSignal.timeout(15000) });
-  if (!response.ok) throw new Error(`Google Fonts a répondu ${response.status}`);
+  if (!response.ok) throw new LocalizedError("googleStatus", { status: response.status });
   const text = (await response.text()).replace(/^\)\]\}'\s*/, "");
   const metadata = metadataSchema.parse(JSON.parse(text));
   return [...metadata.familyMetadataList]

@@ -1,3 +1,4 @@
+import { t, type MessageKey } from "../../i18n";
 import type { JSX } from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import type { FontFamily, FontRef } from "../../../shared/types";
@@ -7,13 +8,20 @@ import { FontRow } from "./FontRow";
 
 type SourceFilter = "all" | "local" | "google" | "favorites";
 
-const SOURCES: readonly { value: SourceFilter; label: string }[] = [
-  { value: "all", label: "Tout" },
-  { value: "local", label: "Mes polices" },
-  { value: "google", label: "Google" },
-  { value: "favorites", label: "Favoris" },
+const SOURCES: readonly { value: SourceFilter; label: MessageKey }[] = [
+  { value: "all", label: "sheet.all" },
+  { value: "local", label: "sheet.mine" },
+  { value: "google", label: "sheet.google" },
+  { value: "favorites", label: "sheet.favorites" },
 ];
-const CATEGORIES = ["Sans Serif", "Serif", "Display", "Handwriting", "Monospace"] as const;
+/** Catégories du catalogue Google Fonts (valeur du catalogue → libellé). */
+const CATEGORIES: readonly { value: string; label: MessageKey }[] = [
+  { value: "Sans Serif", label: "sheet.cat.sans" },
+  { value: "Serif", label: "sheet.cat.serif" },
+  { value: "Display", label: "sheet.cat.display" },
+  { value: "Handwriting", label: "sheet.cat.handwriting" },
+  { value: "Monospace", label: "sheet.cat.mono" },
+];
 const PAGE = 60;
 
 interface FontSheetProps {
@@ -55,13 +63,13 @@ export function FontSheet({ title, value, onPick, onClose }: FontSheetProps): JS
   return (
     <div class="sheet" onKeyDown={(event) => event.key === "Escape" && onClose()}>
       <div class="sheet-head">
-        <button type="button" class="icon-btn" onClick={onClose} aria-label="Retour">
+        <button type="button" class="icon-btn" onClick={onClose} aria-label={t("common.back")}>
           <Icon name="back" />
         </button>
         <input
           ref={search}
           class="input grow"
-          placeholder={`Police pour ${title.toLowerCase()}…`}
+          placeholder={t("sheet.placeholder", { target: title.toLowerCase() })}
           value={query}
           onInput={(event) => setQuery(event.currentTarget.value)}
         />
@@ -70,27 +78,27 @@ export function FontSheet({ title, value, onPick, onClose }: FontSheetProps): JS
         <div class="chip-row">
           {SOURCES.map((option) => (
             <button type="button" class="chip" key={option.value} aria-pressed={source === option.value} onClick={() => setSource(option.value)}>
-              {option.label}
+              {t(option.label)}
             </button>
           ))}
         </div>
         {source !== "local" && (
           <div class="chip-row">
-            {CATEGORIES.map((name) => (
-              <button type="button" class="chip" key={name} aria-pressed={category === name} onClick={() => setCategory(category === name ? null : name)}>
-                {name}
+            {CATEGORIES.map(({ value, label }) => (
+              <button type="button" class="chip" key={value} aria-pressed={category === value} onClick={() => setCategory(category === value ? null : value)}>
+                {t(label)}
               </button>
             ))}
           </div>
         )}
       </div>
       <div class="font-list" onScroll={onScroll}>
-        {fontsLoading.value && <p class="empty">Chargement des polices…</p>}
+        {fontsLoading.value && <p class="empty">{t("sheet.loading")}</p>}
         {!fontsLoading.value && filtered.length === 0 && (
           <p class="empty">
             {source === "local" && fonts.value.local.length === 0
-              ? "Aucune police locale. Ajoute un dossier dans les réglages (roue dentée)."
-              : "Aucune police ne correspond."}
+              ? t("sheet.noLocal")
+              : t("sheet.noMatch")}
           </p>
         )}
         {filtered.slice(0, limit).map((family) => (

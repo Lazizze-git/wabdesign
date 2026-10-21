@@ -1,5 +1,6 @@
 import type { JSX } from "preact";
 import { useRef, useState } from "preact/hooks";
+import { t, tn, type MessageKey } from "../i18n";
 import { canRedo, canUndo, changes, redo, showOriginal, undo } from "../state/changes";
 import { toasts } from "../state/toasts";
 import { activeTab, minimized, position, rememberUi, type TabId } from "../state/ui";
@@ -12,12 +13,12 @@ import { SettingsTab } from "./tabs/SettingsTab";
 import { SystemTab } from "./tabs/SystemTab";
 import { ValidateSheet } from "./ValidateSheet";
 
-const TABS: readonly { id: Exclude<TabId, "settings">; label: string }[] = [
-  { id: "fonts", label: "Polices" },
-  { id: "colors", label: "Couleurs" },
-  { id: "inspect", label: "Inspecter" },
-  { id: "system", label: "Design system" },
-  { id: "changes", label: "Modifs" },
+const TABS: readonly { id: Exclude<TabId, "settings">; label: MessageKey }[] = [
+  { id: "fonts", label: "tab.fonts" },
+  { id: "colors", label: "tab.colors" },
+  { id: "inspect", label: "tab.inspect" },
+  { id: "system", label: "tab.system" },
+  { id: "changes", label: "tab.changes" },
 ];
 
 const CONTENT: Record<TabId, () => JSX.Element> = {
@@ -68,7 +69,7 @@ export function Panel(): JSX.Element {
   if (minimized.value) {
     return (
       <button type="button" class="minimized" onClick={() => ((minimized.value = false), rememberUi())}>
-        Design {count > 0 && <span class="badge">{count}</span>}
+        {t("panel.title")} {count > 0 && <span class="badge">{count}</span>}
       </button>
     );
   }
@@ -77,13 +78,13 @@ export function Panel(): JSX.Element {
   const style = placed ? { left: `${placed.x}px`, top: `${placed.y}px`, right: "auto" } : undefined;
 
   return (
-    <div class="panel" style={style} role="dialog" aria-label="Outil design">
+    <div class="panel" style={style} role="dialog" aria-label={t("panel.name")}>
       <div class="header" onPointerDown={onDrag}>
-        <span class="title">Design</span>
-        <button type="button" class="icon-btn" onClick={undo} disabled={!canUndo.value} title="Annuler (⌘Z)" aria-label="Annuler">
+        <span class="title">{t("panel.title")}</span>
+        <button type="button" class="icon-btn" onClick={undo} disabled={!canUndo.value} title={t("header.undoHint")} aria-label={t("header.undo")}>
           <Icon name="undo" />
         </button>
-        <button type="button" class="icon-btn" onClick={redo} disabled={!canRedo.value} title="Rétablir (⇧⌘Z)" aria-label="Rétablir">
+        <button type="button" class="icon-btn" onClick={redo} disabled={!canRedo.value} title={t("header.redoHint")} aria-label={t("header.redo")}>
           <Icon name="redo" />
         </button>
         <button
@@ -91,22 +92,22 @@ export function Panel(): JSX.Element {
           class="icon-btn"
           aria-pressed={showOriginal.value}
           onClick={() => (showOriginal.value = !showOriginal.value)}
-          title="Voir l’original (ou maintenir ⌥A)"
-          aria-label="Voir l’original"
+          title={t("header.originalHint")}
+          aria-label={t("header.original")}
         >
           <Icon name="eye" />
         </button>
-        <button type="button" class="icon-btn" aria-pressed={activeTab.value === "settings"} onClick={() => selectTab(activeTab.value === "settings" ? "fonts" : "settings")} title="Réglages" aria-label="Réglages">
+        <button type="button" class="icon-btn" aria-pressed={activeTab.value === "settings"} onClick={() => selectTab(activeTab.value === "settings" ? "fonts" : "settings")} title={t("header.settings")} aria-label={t("header.settings")}>
           <Icon name="settings" />
         </button>
-        <button type="button" class="icon-btn" onClick={() => ((minimized.value = true), rememberUi())} title="Réduire (⌥D pour cacher)" aria-label="Réduire">
+        <button type="button" class="icon-btn" onClick={() => ((minimized.value = true), rememberUi())} title={t("header.minimizeHint")} aria-label={t("header.minimize")}>
           <Icon name="minimize" />
         </button>
       </div>
       <div class="tabs" role="tablist">
         {TABS.map((tab) => (
           <button type="button" role="tab" class="tab" key={tab.id} aria-selected={activeTab.value === tab.id} onClick={() => selectTab(tab.id)}>
-            {tab.label}
+            {t(tab.label)}
           </button>
         ))}
       </div>
@@ -114,9 +115,9 @@ export function Panel(): JSX.Element {
         <Content />
       </div>
       <div class="footer">
-        <span class="count">{showOriginal.value ? "Original affiché" : count === 0 ? "Aucune modification" : `${count} modification${count > 1 ? "s" : ""}`}</span>
+        <span class="count">{showOriginal.value ? t("footer.original") : count === 0 ? t("footer.none") : tn(count, "footer.one", "footer.other")}</span>
         <button type="button" class="btn btn-primary" disabled={count === 0} onClick={() => setValidating(true)}>
-          Valider
+          {t("footer.validate")}
         </button>
       </div>
       {validating && <ValidateSheet onClose={() => setValidating(false)} />}

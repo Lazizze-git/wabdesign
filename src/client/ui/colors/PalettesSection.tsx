@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { parsePaletteInput } from "../../engine/colors";
@@ -14,7 +15,7 @@ function NewPaletteForm({ onDone }: { onDone: () => void }): JSX.Element {
   const submit = (event: Event): void => {
     event.preventDefault();
     if (colors.length === 0) {
-      notify("Aucune couleur reconnue", "error");
+      notify(t("palettes.noColor"), "error");
       return;
     }
     addPalette(name, colors);
@@ -22,10 +23,10 @@ function NewPaletteForm({ onDone }: { onDone: () => void }): JSX.Element {
   };
   return (
     <form class="stack" onSubmit={submit}>
-      <input class="input" placeholder="Nom de la palette" value={name} onInput={(e) => setName(e.currentTarget.value)} />
+      <input class="input" placeholder={t("palettes.name")} value={name} onInput={(e) => setName(e.currentTarget.value)} />
       <textarea
         class="textarea mono"
-        placeholder={"Colle tes couleurs : #1d3557 #e63946…\nou un lien coolors.co"}
+        placeholder={t("palettes.paste")}
         value={text}
         onInput={(e) => setText(e.currentTarget.value)}
       />
@@ -38,10 +39,10 @@ function NewPaletteForm({ onDone }: { onDone: () => void }): JSX.Element {
       )}
       <div class="row">
         <button type="button" class="btn btn-ghost grow" onClick={onDone}>
-          Annuler
+          {t("common.cancel")}
         </button>
         <button type="submit" class="btn btn-primary grow" disabled={colors.length === 0}>
-          Ajouter
+          {t("common.add")}
         </button>
       </div>
     </form>
@@ -55,20 +56,20 @@ export function PalettesSection(): JSX.Element {
   return (
     <section class="section">
       <div class="section-head">
-        <span class="section-title">Mes palettes</span>
+        <span class="section-title">{t("palettes.title")}</span>
         {!adding && (
           <button type="button" class="btn" onClick={() => setAdding(true)}>
-            <Icon name="plus" size={14} /> Nouvelle
+            <Icon name="plus" size={14} /> {t("palettes.new")}
           </button>
         )}
       </div>
       {adding && <NewPaletteForm onDone={() => setAdding(false)} />}
-      {!adding && palettes.length === 0 && <p class="hint">Ajoute une palette pour tester ses couleurs sur la page.</p>}
+      {!adding && palettes.length === 0 && <p class="hint">{t("palettes.empty")}</p>}
       {armedColor.value && (
         <p class="hint row">
-          <Swatch color={armedColor.value} /> Clique une couleur du site pour la remplacer.
+          <Swatch color={armedColor.value} /> {t("palettes.armed")}
           <button type="button" class="btn btn-ghost" onClick={() => (armedColor.value = null)}>
-            Annuler
+            {t("common.cancel")}
           </button>
         </p>
       )}
@@ -77,10 +78,10 @@ export function PalettesSection(): JSX.Element {
           <div class="field" key={palette.id}>
             <div class="row">
               <span class="label grow truncate">{palette.name}</span>
-              <button type="button" class="btn btn-ghost" onClick={() => tryPalette(palette)} title="Associer automatiquement aux couleurs du site">
-                Essai rapide
+              <button type="button" class="btn btn-ghost" onClick={() => tryPalette(palette)} title={t("palettes.tryHint")}>
+                {t("palettes.try")}
               </button>
-              <button type="button" class="icon-btn sm" onClick={() => deletePalette(palette.id)} aria-label={`Supprimer ${palette.name}`}>
+              <button type="button" class="icon-btn sm" onClick={() => deletePalette(palette.id)} aria-label={t("palettes.delete", { name: palette.name })}>
                 <Icon name="trash" size={13} />
               </button>
             </div>
@@ -90,7 +91,7 @@ export function PalettesSection(): JSX.Element {
                   type="button"
                   class="swatch-btn"
                   key={color}
-                  title={`${color} : cliquer puis choisir la couleur du site à remplacer`}
+                  title={t("palettes.swatchHint", { color })}
                   onClick={() => (armedColor.value = armedColor.value === color ? null : color)}
                   draggable
                   onDragStart={(event) => event.dataTransfer?.setData("text/plain", color)}

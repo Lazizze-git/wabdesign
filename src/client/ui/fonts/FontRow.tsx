@@ -1,3 +1,4 @@
+import { t, tn } from "../../i18n";
 import type { JSX } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 import type { FontFamily } from "../../../shared/types";
@@ -29,7 +30,7 @@ export function FontRow({ family, selected, onPick }: FontRowProps): JSX.Element
 
   const favorite = isFavorite(family);
   const variable = family.faces.some((face) => face.weightRange !== null);
-  const detail = variable ? "Variable" : `${family.faces.length} style${family.faces.length > 1 ? "s" : ""}`;
+  const detail = variable ? t("row.variable") : tn(family.faces.length, "row.styles.one", "row.styles.other");
 
   return (
     <div ref={ref} class="row">
@@ -43,7 +44,7 @@ export function FontRow({ family, selected, onPick }: FontRowProps): JSX.Element
         type="button"
         class="icon-btn sm star"
         aria-pressed={favorite}
-        aria-label={favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+        aria-label={favorite ? t("row.favoriteRemove") : t("row.favoriteAdd")}
         onClick={() => toggleFavorite(family)}
       >
         <Icon name="star" size={14} />

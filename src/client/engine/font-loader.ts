@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import { googleFamilyUrl, googlePreviewUrl } from "../../shared/google";
 import type { FontFaceInfo, FontFamily } from "../../shared/types";
 import { fontFileUrl } from "../api";
@@ -14,7 +15,7 @@ function addStylesheet(id: string, href: string): void {
   link.id = id;
   link.rel = "stylesheet";
   link.href = href;
-  link.addEventListener("error", () => notify(`Police Google introuvable (${href})`, "error"));
+  link.addEventListener("error", () => notify(t("fonts.googleMissing", { url: href }), "error"));
   (document.head ?? document.documentElement).append(link);
 }
 
@@ -30,7 +31,7 @@ function loadLocalFace(family: string, face: FontFaceInfo): void {
   document.fonts.add(fontFace);
   fontFace.load().catch(() => {
     loadedFaces.delete(face.id);
-    notify(`Impossible de charger ${family} ${face.weight}`, "error");
+    notify(t("fonts.loadFailed", { family, weight: face.weight }), "error");
   });
 }
 

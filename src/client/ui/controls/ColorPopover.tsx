@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { parseColor, toHex } from "../../engine/colors";
@@ -35,15 +36,15 @@ export function ColorPopover({ value, onChange, onClose, onReset }: ColorPopover
 
   return (
     <>
-      <button type="button" class="backdrop" tabIndex={-1} aria-label="Fermer le choix de couleur" onClick={onClose} />
-      <div class="popover stack" role="dialog" aria-label="Choisir une couleur">
+      <button type="button" class="backdrop" tabIndex={-1} aria-label={t("picker.close")} onClick={onClose} />
+      <div class="popover stack" role="dialog" aria-label={t("picker.dialog")}>
         <div class="row">
           <input
             type="color"
             value={hex}
             onInput={(event) => onChange(event.currentTarget.value)}
             style="width:36px;height:28px;border:0;padding:0;background:none"
-            aria-label="Pipette"
+            aria-label={t("picker.eyedropper")}
           />
           <input
             class="input mono grow"
@@ -51,7 +52,7 @@ export function ColorPopover({ value, onChange, onClose, onReset }: ColorPopover
             onInput={(event) => setDraft(event.currentTarget.value)}
             onBlur={commitDraft}
             onKeyDown={(event) => event.key === "Enter" && commitDraft(event)}
-            aria-label="Valeur de la couleur"
+            aria-label={t("picker.value")}
           />
           {onReset && (
             <button type="button" class="btn btn-ghost" onClick={onReset}>
@@ -59,7 +60,7 @@ export function ColorPopover({ value, onChange, onClose, onReset }: ColorPopover
             </button>
           )}
         </div>
-        {palettes.length === 0 && <p class="hint">Crée une palette dans l’onglet Couleurs pour l’avoir ici.</p>}
+        {palettes.length === 0 && <p class="hint">{t("picker.noPalette")}</p>}
         {palettes.map((palette) => (
           <div key={palette.id} class="field">
             <span class="label">{palette.name}</span>

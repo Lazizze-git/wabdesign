@@ -1,5 +1,12 @@
 /** Types partagés entre le serveur local et le panneau injecté dans la page. */
 
+/** Langue de l’interface. « auto » suit le navigateur (panneau) ou le système (terminal). */
+export type Language = "fr" | "en";
+export type LanguageSetting = "auto" | Language;
+
+/** En-tête par lequel le panneau indique au serveur la langue de ses messages. */
+export const LANGUAGE_HEADER = "x-wabdesign-lang";
+
 export type FontSource = "local" | "google";
 
 export interface FontAxis {
@@ -92,6 +99,7 @@ export interface Pairing {
 }
 
 export interface Config {
+  language: LanguageSetting;
   fontFolders: string[];
   googleFonts: boolean;
   palettes: Palette[];

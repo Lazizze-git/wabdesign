@@ -6,6 +6,7 @@ import type { StatusResponse, ValidateEvent } from "../shared/types";
 import { validateChanges } from "./apply/validate";
 import type { FontService } from "./fonts/font-service";
 import { HttpError, readJsonBody, sendJson } from "./http-utils";
+import { requestLanguage } from "./i18n";
 import { findDriveRoot } from "./paths";
 import { pickFolder } from "./pick-folder";
 import { loadConfig, loadSession, saveConfig, saveSession } from "./stores";
@@ -26,13 +27,13 @@ const FONT_MIME: Record<string, string> = {
 
 function parse<T>(schema: z.ZodType<T>, data: unknown): T {
   const result = schema.safeParse(data);
-  if (!result.success) throw new HttpError(400, "Données invalides");
+  if (!result.success) throw new HttpError(400, "errInvalidData");
   return result.data;
 }
 
 function serveFontFile(res: ServerResponse, ctx: ApiContext, id: string): void {
   const face = ctx.fonts.file(id);
-  if (!face) throw new HttpError(404, "Police introuvable");
+  if (!face) throw new HttpError(404, "errFontNotFound");
   res.writeHead(200, {
     "content-type": FONT_MIME[face.format] ?? "application/octet-stream",
     "cache-control": "private, max-age=3600",
@@ -45,13 +46,13 @@ function serveFontFile(res: ServerResponse, ctx: ApiContext, id: string): void {
 async function streamValidation(req: IncomingMessage, res: ServerResponse, ctx: ApiContext): Promise<void> {
   const body = parse(validateSchema, await readJsonBody(req));
   if (body.mode === "claude" && !ctx.claudeAvailable) {
-    throw new HttpError(400, "Claude Code est introuvable sur ce Mac.");
+    throw new HttpError(400, "errClaudeMissing");
   }
   res.writeHead(200, { "content-type": "application/x-ndjson; charset=utf-8", "cache-control": "no-store" });
   const emit = (event: ValidateEvent): void => {
     if (!res.writableEnded) res.write(`${JSON.stringify(event)}\n`);
   };
-  await validateChanges(ctx.projectDir, body.changes, body.mode, ctx.fonts, emit);
+  await validateChanges(ctx.projectDir, body.changes, body.mode, ctx.fonts, emit, body.language);
   res.end();
 }
 
@@ -74,7 +75,7 @@ export async function handleApi(req: IncomingMessage, res: ServerResponse, path:
     return sendJson(res, 200, config);
   }
   if (route === "GET /fonts" || route === "GET /fonts?refresh=1") {
-    const fonts = await ctx.fonts.list(await loadConfig(), route.endsWith("refresh=1"));
+    const fonts = await ctx.fonts.list(await loadConfig(), requestLanguage(req), route.endsWith("refresh=1"));
     return sendJson(res, 200, fonts);
   }
   const fontFile = /^GET \/fonts\/file\/([a-f0-9]{16})$/.exec(route);
@@ -86,5 +87,5 @@ export async function handleApi(req: IncomingMessage, res: ServerResponse, path:
     return sendJson(res, 200, { ok: true });
   }
   if (route === "POST /validate") return streamValidation(req, res, ctx);
-  throw new HttpError(404, "Route inconnue");
+  throw new HttpError(404, "errUnknownRoute");
 }

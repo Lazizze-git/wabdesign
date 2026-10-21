@@ -1,3 +1,4 @@
+import { t, type MessageKey } from "../../i18n";
 import type { JSX } from "preact";
 import { changeKey } from "../../../shared/css";
 import type { Change, ChangeGroup } from "../../../shared/types";
@@ -7,13 +8,13 @@ import { highlightSelector } from "../../state/inspector";
 import { Swatch } from "../controls/Swatch";
 import { Icon } from "../icons";
 
-const GROUPS: readonly { group: ChangeGroup; title: string }[] = [
-  { group: "fonts", title: "Polices" },
-  { group: "system", title: "Réglages globaux" },
-  { group: "vars", title: "Design system" },
-  { group: "swap", title: "Couleurs remplacées" },
-  { group: "inspect", title: "Éléments retouchés" },
-  { group: "text", title: "Textes réécrits" },
+const GROUPS: readonly { group: ChangeGroup; title: MessageKey }[] = [
+  { group: "fonts", title: "changes.fonts" },
+  { group: "system", title: "changes.system" },
+  { group: "vars", title: "changes.vars" },
+  { group: "swap", title: "changes.swap" },
+  { group: "inspect", title: "changes.inspect" },
+  { group: "text", title: "changes.text" },
 ];
 
 function ChangeItem({ change }: { change: Change }): JSX.Element {
@@ -28,7 +29,7 @@ function ChangeItem({ change }: { change: Change }): JSX.Element {
       <div class="grow" style="min-width:0">
         <div class="truncate">{change.group === "swap" ? `${change.previous ?? ""}` : change.target.label}</div>
         <div class="row muted mono" style="gap:4px">
-          {change.group === "text" && <span class="truncate">« {change.value} »</span>}
+          {change.group === "text" && <span class="truncate">{t("changes.quoted", { text: change.value })}</span>}
           {change.group !== "swap" && change.group !== "text" && <span class="truncate">{change.property}</span>}
           {isColor && change.previous && <Swatch color={change.previous} />}
           {isColor && <span class="arrow">→</span>}
@@ -37,7 +38,7 @@ function ChangeItem({ change }: { change: Change }): JSX.Element {
           {isColor && <span class="truncate">{change.value}</span>}
         </div>
       </div>
-      <button type="button" class="icon-btn sm" onClick={() => removeChange(changeKey(change))} aria-label="Retirer cette modification">
+      <button type="button" class="icon-btn sm" onClick={() => removeChange(changeKey(change))} aria-label={t("changes.remove")}>
         <Icon name="close" size={13} />
       </button>
     </div>
@@ -47,7 +48,7 @@ function ChangeItem({ change }: { change: Change }): JSX.Element {
 export function ChangesTab(): JSX.Element {
   const list = changes.value;
   if (list.length === 0) {
-    return <p class="empty">Aucune modification pour l’instant. Tout ce que tu changes apparaîtra ici avant d’être validé.</p>;
+    return <p class="empty">{t("changes.empty")}</p>;
   }
   return (
     <>
@@ -57,7 +58,7 @@ export function ChangesTab(): JSX.Element {
         return (
           <section class="section" key={group}>
             <div class="section-head">
-              <span class="section-title">{title}</span>
+              <span class="section-title">{t(title)}</span>
               <span class="muted">{items.length}</span>
             </div>
             {items.map((change) => (
@@ -68,7 +69,7 @@ export function ChangesTab(): JSX.Element {
       })}
       <section class="section">
         <button type="button" class="btn btn-ghost btn-danger btn-block" onClick={clearChanges}>
-          <Icon name="trash" size={14} /> Tout effacer (annulable)
+          <Icon name="trash" size={14} /> {t("changes.clear")}
         </button>
       </section>
     </>

@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { changeKey } from "../../../shared/css";
@@ -26,8 +27,8 @@ export function TextContent({ element }: { element: Element }): JSX.Element | nu
   if (!isTextEditable(element)) {
     return (
       <section class="section">
-        <span class="section-title">Contenu</span>
-        <p class="hint" style="margin:6px 0 0">Ce bloc contient d’autres éléments : clique directement sur le texte à modifier.</p>
+        <span class="section-title">{t("inspect.content")}</span>
+        <p class="hint" style="margin:6px 0 0">{t("inspect.contentNested")}</p>
       </section>
     );
   }
@@ -50,11 +51,11 @@ export function TextContent({ element }: { element: Element }): JSX.Element | nu
     <section class="section stack">
       <div class="section-head" style="margin:0">
         <span class="section-title">
-          Contenu{change && <span class="changed"> •</span>}
+          {t("inspect.content")}{change && <span class="changed"> •</span>}
         </span>
         {change && (
           <button type="button" class="btn btn-ghost" onClick={() => removeChange(changeKey(change))}>
-            Rétablir
+            {t("common.reset")}
           </button>
         )}
       </div>
@@ -63,7 +64,7 @@ export function TextContent({ element }: { element: Element }): JSX.Element | nu
         rows={Math.min(6, Math.max(2, Math.ceil(current.length / 38)))}
         value={draft ?? current}
         disabled={inPage}
-        aria-label="Texte de l’élément"
+        aria-label={t("inspect.textLabel")}
         onInput={(event) => {
           setDraft(event.currentTarget.value);
           setText(event.currentTarget.value);
@@ -71,7 +72,7 @@ export function TextContent({ element }: { element: Element }): JSX.Element | nu
         onBlur={() => setDraft(null)}
       />
       <button type="button" class={`btn btn-block${inPage ? " btn-primary" : ""}`} onClick={startInPage} disabled={inPage}>
-        {inPage ? "Écris dans la page… (Entrée ou Échap pour finir)" : "Écrire directement dans la page"}
+        {inPage ? t("inspect.writingInPage") : t("inspect.writeInPage")}
       </button>
     </section>
   );

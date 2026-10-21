@@ -1,6 +1,7 @@
 import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from "node:http";
 import { brotliDecompressSync, gunzipSync, inflateSync } from "node:zlib";
 import { injectPanel } from "./inject";
+import { tm } from "./i18n";
 import { errorMessage, logger } from "./logger";
 
 const HOP_BY_HOP = ["connection", "keep-alive", "transfer-encoding", "upgrade", "proxy-connection"];
@@ -42,9 +43,9 @@ export function sendInjectedHtml(proxyRes: IncomingMessage, res: ServerResponse,
     try {
       html = decode(Buffer.concat(chunks), proxyRes.headers["content-encoding"]).toString("utf8");
     } catch (error) {
-      logger.warn(`Page illisible, panneau non injecté (${errorMessage(error)})`);
+      logger.warn(tm("pageUnreadableLog", { error: errorMessage(error) }));
       res.writeHead(502, { "content-type": "text/plain; charset=utf-8" });
-      res.end("Outil design : la page de la preview n’a pas pu être lue.");
+      res.end(tm("pageUnreadable"));
       return;
     }
     const body = Buffer.from(injectPanel(html), "utf8");

@@ -1,13 +1,16 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { LocalizedError, type MessageKey, type MessageVars } from "./i18n";
 
 const MAX_BODY_BYTES = 5 * 1024 * 1024;
 
-export class HttpError extends Error {
+/** Erreur HTTP dont le message est traduit dans la langue du panneau au moment de répondre. */
+export class HttpError extends LocalizedError {
   constructor(
     readonly status: number,
-    message: string,
+    key: MessageKey,
+    vars: MessageVars = {},
   ) {
-    super(message);
+    super(key, vars);
   }
 }
 
@@ -27,13 +30,13 @@ export async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   for await (const chunk of req) {
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk));
     size += buffer.length;
-    if (size > MAX_BODY_BYTES) throw new HttpError(413, "Requête trop volumineuse");
+    if (size > MAX_BODY_BYTES) throw new HttpError(413, "errBodyTooLarge");
     chunks.push(buffer);
   }
   try {
     return JSON.parse(Buffer.concat(chunks).toString("utf8"));
   } catch {
-    throw new HttpError(400, "JSON invalide");
+    throw new HttpError(400, "errInvalidJson");
   }
 }
 

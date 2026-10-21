@@ -1,3 +1,4 @@
+import type { MessageKey } from "../i18n";
 /** Classement des variables CSS d'un site en familles de design system, d'après leur nom et leur valeur. */
 
 export type TokenKind =
@@ -15,18 +16,18 @@ export type TokenKind =
 
 export interface TokenGroupDefinition {
   id: string;
-  title: string;
+  title: MessageKey;
   kinds: readonly TokenKind[];
 }
 
 export const TOKEN_GROUPS: readonly TokenGroupDefinition[] = [
-  { id: "colors", title: "Couleurs", kinds: ["color"] },
-  { id: "type", title: "Typographie", kinds: ["font", "weight", "size", "leading", "tracking"] },
-  { id: "radius", title: "Arrondis", kinds: ["radius"] },
-  { id: "spacing", title: "Espacements", kinds: ["spacing"] },
-  { id: "shadow", title: "Ombres", kinds: ["shadow"] },
-  { id: "layout", title: "Mise en page", kinds: ["layout"] },
-  { id: "other", title: "Autres", kinds: ["other"] },
+  { id: "colors", title: "kind.colors", kinds: ["color"] },
+  { id: "type", title: "kind.type", kinds: ["font", "weight", "size", "leading", "tracking"] },
+  { id: "radius", title: "kind.radius", kinds: ["radius"] },
+  { id: "spacing", title: "kind.spacing", kinds: ["spacing"] },
+  { id: "shadow", title: "kind.shadow", kinds: ["shadow"] },
+  { id: "layout", title: "kind.layout", kinds: ["layout"] },
+  { id: "other", title: "kind.other", kinds: ["other"] },
 ];
 
 const LENGTH = /^-?\d*\.?\d+(px|rem|em|%|ch|vw|vh)?$/;

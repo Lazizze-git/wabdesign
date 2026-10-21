@@ -1,3 +1,4 @@
+import { language, t } from "../i18n";
 import { computed, signal } from "@preact/signals";
 import type { Change, Palette } from "../../shared/types";
 import { colorKey, luminance, parseColor } from "../engine/colors";
@@ -43,7 +44,7 @@ export function swapChange(fromKey: string, value: string): Change {
   return {
     id: uid("chg"),
     group: "swap",
-    target: { selector: "*", label: "Toute la page", scope: "global", context: null },
+    target: { selector: "*", label: t("colors.wholePage"), scope: "global", context: null },
     property: "color",
     value,
     previous: fromKey,
@@ -83,19 +84,19 @@ export function tryPalette(palette: Palette): void {
   };
   const source = siteColors.value.filter((color) => color.visible > 0).slice(0, palette.colors.length);
   if (source.length === 0) {
-    notify("Aucune couleur du site à remplacer", "error");
+    notify(t("palettes.nothing"), "error");
     return;
   }
   const from = [...source].sort((a, b) => brightness(a.key) - brightness(b.key));
   const to = [...palette.colors].sort((a, b) => brightness(a) - brightness(b));
   const step = to.length / from.length;
   upsertMany(from.map((color, index) => swapChange(color.key, to[Math.floor(index * step)] ?? color.key)));
-  notify(`Palette « ${palette.name} » appliquée à ${from.length} couleurs`);
+  notify(t("palettes.applied", { name: palette.name, n: from.length }));
 }
 
 export function addPalette(name: string, colors: readonly string[]): void {
   const unique = [...new Set(colors.map((color) => colorKey(color) ?? color))];
-  const palette: Palette = { id: uid("pal"), name: name.trim() || `Palette ${new Date().toLocaleDateString("fr-CH")}`, colors: unique };
+  const palette: Palette = { id: uid("pal"), name: name.trim() || t("palettes.defaultName", { date: new Date().toLocaleDateString(language.value === "fr" ? "fr-CH" : "en-GB") }), colors: unique };
   void updateConfig((current) => ({ ...current, palettes: [palette, ...current.palettes] }));
 }
 

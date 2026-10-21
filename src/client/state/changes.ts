@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import { computed, signal } from "@preact/signals";
 import { changeKey } from "../../shared/css";
 import type { Change } from "../../shared/types";
@@ -22,7 +23,7 @@ let lastCommitAt = 0;
 function persist(): void {
   window.clearTimeout(saveTimer);
   saveTimer = window.setTimeout(() => {
-    api.saveSession({ changes: [...changes.value] }).catch(() => notify("Session non enregistrée", "error"));
+    api.saveSession({ changes: [...changes.value] }).catch(() => notify(t("state.sessionNotSaved"), "error"));
   }, 400);
 }
 
@@ -99,6 +100,6 @@ export async function restoreSession(): Promise<void> {
     const session = await api.session();
     changes.value = session.changes;
   } catch {
-    notify("Impossible de reprendre la session précédente", "error");
+    notify(t("state.sessionNotRestored"), "error");
   }
 }

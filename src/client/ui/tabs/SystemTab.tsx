@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { sampleElement } from "../../engine/roles";
@@ -21,14 +22,14 @@ function displayValue(setting: SystemSetting, value: string, sample: Element | n
 
 function SettingField({ setting }: { setting: SystemSetting }): JSX.Element | null {
   const sample = sampleElement(setting.sample, getHost());
-  const target = { selector: setting.selector, label: setting.label, scope: "global" as const, context: null };
+  const target = { selector: setting.selector, label: t(setting.label), scope: "global" as const, context: null };
   const binding = createBinding("system", target, sample);
   const changed = binding.isChanged(setting.property);
   const raw = changed ? binding.get(setting.property) : computedValue(sample, setting.readProperty ?? setting.property);
   if (!sample && !changed) return null;
   return (
     <NumberField
-      label={setting.label}
+      label={t(setting.label)}
       property={setting.property}
       value={displayValue(setting, raw, sample, changed)}
       units={setting.units}
@@ -44,15 +45,12 @@ function ElementSettings(): JSX.Element {
   return (
     <>
       <section class="section">
-        <p class="hint" style="margin:0">
-          Une valeur pour tous les éléments d’un même type (tous les paragraphes, tous les boutons…). Pour un seul élément, passe par
-          l’onglet Inspecter.
-        </p>
+        <p class="hint" style="margin:0">{t("system.elementsHint")}</p>
       </section>
       {SYSTEM_GROUPS.map((group) => (
         <section class="section stack" key={group.title}>
           <div class="section-head" style="margin:0">
-            <span class="section-title">{group.title}</span>
+            <span class="section-title">{t(group.title)}</span>
             <button
               type="button"
               class="btn btn-ghost"
@@ -60,7 +58,7 @@ function ElementSettings(): JSX.Element {
                 removeWhere((change) => change.group === "system" && group.settings.some((s) => s.selector === change.target.selector))
               }
             >
-              Rétablir
+              {t("common.reset")}
             </button>
           </div>
           <div class="grid-2">
@@ -81,10 +79,10 @@ export function SystemTab(): JSX.Element {
     <>
       <section class="section">
         <Segmented<View>
-          label="Affichage"
+          label={t("system.view")}
           options={[
-            { value: "tokens", label: `Variables · ${designTokens.value.length}` },
-            { value: "elements", label: "Par type d’élément" },
+            { value: "tokens", label: t("system.viewTokens", { n: designTokens.value.length }) },
+            { value: "elements", label: t("system.viewElements") },
           ]}
           value={view}
           onChange={setView}

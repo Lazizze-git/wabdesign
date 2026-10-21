@@ -6,26 +6,17 @@ import { detectDevPort, findFreePort, resolveTargetHost } from "./net-utils";
 import { findProjectDevPort, findRunningPanel } from "./project-server";
 import { startProxy } from "./proxy-server";
 import { installSkill, openInBrowser } from "./setup";
+import { resolveTerminalLanguage, setTerminalLanguage, tm } from "./i18n";
+import { loadConfig } from "./stores";
 
 const DEFAULT_PROXY_PORT = 4000;
-
-const HELP = `wabdesign — panneau de design en direct par-dessus ta preview locale.
-
-Utilisation (dans le dossier du projet) :
-  wabdesign              trouve la preview du projet et ouvre le panneau
-  wabdesign 3000         utilise la preview sur localhost:3000
-  wabdesign 3000 --port 4100 --no-open
-  wabdesign setup        installe la commande /wabdesign dans Claude Code
-  wabdesign --version
-
-Dans le navigateur : Option + D (Alt + D) affiche ou cache le panneau.`;
 
 function version(): string {
   try {
     const pkg: unknown = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-    return pkg && typeof pkg === "object" && "version" in pkg ? String(pkg.version) : "inconnue";
+    return pkg && typeof pkg === "object" && "version" in pkg ? String(pkg.version) : tm("versionUnknown");
   } catch {
-    return "inconnue";
+    return tm("versionUnknown");
   }
 }
 
@@ -57,12 +48,13 @@ async function findTargetPort(proxyPort: number): Promise<number | null> {
   if (own) return own;
   const fallback = await detectDevPort(proxyPort);
   if (fallback) {
-    logger.warn(`Aucune preview lancée depuis ce dossier : j’utilise celle du port ${fallback}. Si ce n’est pas le bon projet, indique le port : wabdesign 3000`);
+    logger.warn(tm("fallbackPort", { port: fallback }));
   }
   return fallback;
 }
 
 async function main(): Promise<void> {
+  setTerminalLanguage(resolveTerminalLanguage((await loadConfig()).language));
   const argv = process.argv.slice(2);
   if (argv[0] === "setup") return installSkill();
   if (argv.includes("--version") || argv.includes("-v")) {
@@ -71,18 +63,19 @@ async function main(): Promise<void> {
   }
   const options = parseArgs(argv);
   if (!options) {
-    process.stdout.write(`${HELP}\n`);
+    process.stdout.write(`${tm("cliHelp")}
+`);
     return;
   }
   const running = options.targetPort ? null : await findRunningPanel(process.cwd(), options.proxyPort);
   if (running) {
-    logger.info(`Le panneau tourne déjà pour ce projet : ${running}`);
+    logger.info(tm("alreadyRunning", { url: running }));
     if (options.open) openInBrowser(running);
     return;
   }
   const targetPort = options.targetPort ?? (await findTargetPort(options.proxyPort));
   if (!targetPort) {
-    logger.error("Aucune preview détectée. Lance d’abord ton serveur (npm run dev), ou indique son port : wabdesign 3000");
+    logger.error(tm("noPreview"));
     process.exitCode = 1;
     return;
   }
@@ -96,14 +89,14 @@ async function main(): Promise<void> {
     api: { projectDir: process.cwd(), fonts: new FontService(), claudeAvailable },
   });
   const url = `http://localhost:${port}`;
-  logger.info(`Preview avec panneau de design : ${url}`);
-  logger.detail(`Relaie localhost:${targetPort} · projet : ${process.cwd()}`);
-  logger.detail("Option + D (Alt + D) dans le navigateur pour afficher ou cacher le panneau.");
-  if (!claudeAvailable) logger.warn("Claude Code introuvable : « Valider » enregistrera seulement la fiche des modifications.");
+  logger.info(tm("ready", { url }));
+  logger.detail(tm("relay", { port: targetPort, dir: process.cwd() }));
+  logger.detail(tm("shortcutHint"));
+  if (!claudeAvailable) logger.warn(tm("claudeMissing"));
   if (options.open) openInBrowser(url);
 }
 
 main().catch((error: unknown) => {
-  logger.error(`Démarrage impossible : ${errorMessage(error)}`);
+  logger.error(tm("startFailed", { error: errorMessage(error) }));
   process.exitCode = 1;
 });

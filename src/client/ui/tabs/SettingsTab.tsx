@@ -1,19 +1,28 @@
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
+import type { LanguageSetting } from "../../../shared/types";
 import { api } from "../../api";
+import { languageSetting, t, tn } from "../../i18n";
 import { config, fonts, fontsLoading, loadFonts, status, updateConfig } from "../../state/library";
 import { notify } from "../../state/toasts";
+import { Segmented } from "../controls/Segmented";
 import { Icon } from "../icons";
+
+const IS_MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
 function addFolder(path: string): void {
   const clean = path.trim().replace(/\/$/, "");
-  if (!clean.startsWith("/")) {
-    notify("Le chemin doit commencer par / (clic droit + Option dans le Finder → Copier en tant que nom de chemin)", "error");
+  if (!clean.startsWith("/") && !/^[A-Za-z]:\\/.test(clean)) {
+    notify(t("settings.badPath"), "error");
     return;
   }
   void updateConfig((current) =>
     current.fontFolders.includes(clean) ? current : { ...current, fontFolders: [...current.fontFolders, clean] },
   );
+}
+
+function shortPath(path: string): string {
+  return path.replace(/^\/Users\/[^/]+/, "~");
 }
 
 function FoldersSection(): JSX.Element {
@@ -26,31 +35,31 @@ function FoldersSection(): JSX.Element {
       const picked = await api.pickFolder();
       if (picked.path) addFolder(picked.path);
     } catch (error) {
-      notify(error instanceof Error ? error.message : "Sélection impossible", "error");
+      notify(error instanceof Error ? error.message : t("settings.pickFailed"), "error");
     }
   };
 
   return (
     <section class="section stack">
       <div class="section-head" style="margin:0">
-        <span class="section-title">Dossiers de polices</span>
-        <button type="button" class="icon-btn" onClick={() => void loadFonts(true)} disabled={fontsLoading.value} title="Relire les dossiers" aria-label="Relire les dossiers">
+        <span class="section-title">{t("settings.folders")}</span>
+        <button type="button" class="icon-btn" onClick={() => void loadFonts(true)} disabled={fontsLoading.value} title={t("settings.rescan")} aria-label={t("settings.rescan")}>
           <Icon name="refresh" size={14} />
         </button>
       </div>
       <p class="hint" style="margin:0">
-        Fichiers .otf, .ttf, .woff et .woff2, sous-dossiers compris. {fonts.value.local.length} famille(s) trouvée(s).
+        {tn(fonts.value.local.length, "settings.foldersHint.one", "settings.foldersHint.other")}
       </p>
       {folders.map((folder) => (
         <div class="row" key={folder}>
           <Icon name="folder" size={14} />
           <span class="grow truncate mono" title={folder}>
-            {folder.replace(/^\/Users\/[^/]+/, "~")}
+            {shortPath(folder)}
           </span>
           <button
             type="button"
             class="icon-btn sm"
-            aria-label="Retirer ce dossier"
+            aria-label={t("settings.removeFolder")}
             onClick={() => void updateConfig((current) => ({ ...current, fontFolders: current.fontFolders.filter((f) => f !== folder) }))}
           >
             <Icon name="close" size={13} />
@@ -58,15 +67,58 @@ function FoldersSection(): JSX.Element {
         </div>
       ))}
       <button type="button" class="btn btn-block" onClick={() => void browse()}>
-        <Icon name="folder" size={14} /> Choisir un dossier…
+        <Icon name="folder" size={14} /> {t("settings.chooseFolder")}
       </button>
-      {drive && <p class="hint" style="margin:0">Google Drive est synchronisé sur ce Mac : choisis ton dossier dans « Google Drive » depuis la fenêtre du Finder.</p>}
+      {drive && <p class="hint" style="margin:0">{t("settings.drive")}</p>}
       <form class="row" onSubmit={(event) => (event.preventDefault(), addFolder(manual), setManual(""))}>
-        <input class="input grow mono" placeholder="ou colle un chemin : /Users/…" value={manual} onInput={(e) => setManual(e.currentTarget.value)} />
+        <input class="input grow mono" placeholder={t("settings.pastePath")} value={manual} onInput={(e) => setManual(e.currentTarget.value)} />
         <button type="submit" class="btn" disabled={!manual.trim()}>
-          Ajouter
+          {t("common.add")}
         </button>
       </form>
+    </section>
+  );
+}
+
+function LanguageSection(): JSX.Element {
+  const choose = (value: LanguageSetting): void => {
+    languageSetting.value = value;
+    void updateConfig((current) => ({ ...current, language: value }));
+  };
+  return (
+    <section class="section stack">
+      <span class="section-title">{t("settings.language")}</span>
+      <Segmented<LanguageSetting>
+        label={t("settings.language")}
+        options={[
+          { value: "auto", label: t("settings.languageAuto") },
+          { value: "fr", label: "Français" },
+          { value: "en", label: "English" },
+        ]}
+        value={languageSetting.value}
+        onChange={choose}
+      />
+    </section>
+  );
+}
+
+function ShortcutsSection(): JSX.Element {
+  const alt = IS_MAC ? "⌥ " : "Alt + ";
+  const rows: [string, string][] = [
+    [t("settings.toggle"), `${alt}D`],
+    [t("settings.undoRedo"), IS_MAC ? "⌘ Z / ⇧ ⌘ Z" : "Ctrl + Z / Ctrl + Shift + Z"],
+    [t("settings.pick"), `${alt}S`],
+    [t("settings.original"), `${alt}A`],
+  ];
+  return (
+    <section class="section stack">
+      <span class="section-title">{t("settings.shortcuts")}</span>
+      {rows.map(([label, keys]) => (
+        <div class="row" key={label}>
+          <span class="grow">{label}</span>
+          <span class="mono">{keys}</span>
+        </div>
+      ))}
     </section>
   );
 }
@@ -75,6 +127,7 @@ export function SettingsTab(): JSX.Element {
   const current = config.value;
   return (
     <>
+      <LanguageSection />
       <FoldersSection />
       <section class="section stack">
         <label class="row">
@@ -83,23 +136,17 @@ export function SettingsTab(): JSX.Element {
             checked={current?.googleFonts ?? true}
             onChange={(event) => void updateConfig((c) => ({ ...c, googleFonts: event.currentTarget.checked }))}
           />
-          <span class="grow">Catalogue Google Fonts</span>
+          <span class="grow">{t("settings.google")}</span>
           <span class="muted">{fonts.value.google.length}</span>
         </label>
       </section>
-      <section class="section stack">
-        <span class="section-title">Raccourcis</span>
-        <div class="row"><span class="grow">Afficher / cacher le panneau</span><span class="mono">⌥ D</span></div>
-        <div class="row"><span class="grow">Annuler / rétablir</span><span class="mono">⌘ Z / ⇧ ⌘ Z</span></div>
-        <div class="row"><span class="grow">Sélectionner un élément</span><span class="mono">⌥ S</span></div>
-        <div class="row"><span class="grow">Voir l’original (maintenir)</span><span class="mono">⌥ A</span></div>
-      </section>
+      <ShortcutsSection />
       {status.value && (
         <section class="section">
           <p class="hint mono" style="margin:0">
-            Projet : {status.value.project.replace(/^\/Users\/[^/]+/, "~")}
+            {t("settings.project", { path: shortPath(status.value.project) })}
             <br />
-            Preview : {status.value.target}
+            {t("settings.preview", { url: status.value.target })}
           </p>
         </section>
       )}

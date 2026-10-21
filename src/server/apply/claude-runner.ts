@@ -1,6 +1,8 @@
 import { spawn, spawnSync } from "node:child_process";
 import { relative } from "node:path";
 import { z } from "zod";
+import type { Language } from "../../shared/types";
+import { LocalizedError, msg } from "../i18n";
 
 const TIMEOUT_MS = 10 * 60 * 1000;
 const ALLOWED_TOOLS = "Read,Edit,Write,Glob,Grep,Bash(cp:*),Bash(mkdir:*),Bash(ls:*)";
@@ -24,19 +26,19 @@ const streamLineSchema = z.union([
   z.object({ type: z.literal("result"), is_error: z.boolean().optional(), result: z.string().optional() }),
 ]);
 
-function describeTool(name: string, input: Record<string, unknown>, cwd: string): string | null {
+function describeTool(name: string, input: Record<string, unknown>, cwd: string, language: Language): string | null {
   const file = typeof input["file_path"] === "string" ? relative(cwd, input["file_path"]) : null;
   switch (name) {
     case "Edit":
     case "Write":
-      return file ? `Modifie ${file}` : "Modifie un fichier";
+      return file ? msg(language, "stepEdit", { file }) : msg(language, "stepEditAny");
     case "Read":
-      return file ? `Lit ${file}` : null;
+      return file ? msg(language, "stepRead", { file }) : null;
     case "Grep":
     case "Glob":
-      return "Cherche dans le projet…";
+      return msg(language, "stepSearch");
     case "Bash":
-      return "Copie les fichiers de police…";
+      return msg(language, "stepCopyFonts");
     default:
       return null;
   }
@@ -47,7 +49,7 @@ export interface RunnerCallbacks {
 }
 
 /** Lance Claude Code en arrière-plan dans le projet, et raconte ce qu'il fait au fur et à mesure. */
-export function runClaude(prompt: string, cwd: string, callbacks: RunnerCallbacks): Promise<string> {
+export function runClaude(prompt: string, cwd: string, language: Language, callbacks: RunnerCallbacks): Promise<string> {
   return new Promise((resolve, reject) => {
     const args = ["-p", prompt, "--output-format", "stream-json", "--verbose"];
     args.push("--permission-mode", "acceptEdits", "--allowedTools", ALLOWED_TOOLS);
@@ -76,7 +78,7 @@ export function runClaude(prompt: string, cwd: string, callbacks: RunnerCallback
       for (const block of parsed.message.content) {
         const tool = toolUseSchema.safeParse(block);
         if (!tool.success) continue;
-        const step = describeTool(tool.data.name, tool.data.input, cwd);
+        const step = describeTool(tool.data.name, tool.data.input, cwd, language);
         if (step) callbacks.onStep(step);
       }
     };
@@ -92,14 +94,14 @@ export function runClaude(prompt: string, cwd: string, callbacks: RunnerCallback
     });
     child.on("error", (error) => {
       clearTimeout(timer);
-      reject(new Error(`Impossible de lancer Claude Code (${error.message})`));
+      reject(new LocalizedError("claudeLaunchFailed", { error: error.message }));
     });
     child.on("close", (code) => {
       clearTimeout(timer);
       handleLine(buffer);
       if (summary !== null && !failed) return resolve(summary);
-      const reason = summary || stderr.trim() || `code de sortie ${code ?? "inconnu"}`;
-      reject(new Error(`Claude Code n’a pas pu terminer : ${reason}`));
+      const reason = summary || stderr.trim() || msg(language, "claudeExitCode", { code: code ?? msg(language, "unknown") });
+      reject(new LocalizedError("claudeFailed", { reason }));
     });
   });
 }

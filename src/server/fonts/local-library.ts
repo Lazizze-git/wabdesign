@@ -3,6 +3,7 @@ import { basename } from "node:path";
 import { z } from "zod";
 import type { FontFamily } from "../../shared/types";
 import { readJson, writeJson } from "../json-file";
+import { LocalizedError } from "../i18n";
 import { errorMessage } from "../logger";
 import { FONT_CACHE_FILE } from "../paths";
 import { readFont, type FaceRecord } from "./read-font";
@@ -32,21 +33,21 @@ type FontCache = z.infer<typeof cacheSchema>;
 export interface LocalScan {
   families: FontFamily[];
   files: Map<string, FaceRecord>;
-  errors: string[];
+  errors: LocalizedError[];
 }
 
 export function faceId(path: string): string {
   return createHash("sha1").update(path).digest("hex").slice(0, 16);
 }
 
-async function readFace(entry: FontFileEntry, cache: FontCache, errors: string[]): Promise<FaceRecord | null> {
+async function readFace(entry: FontFileEntry, cache: FontCache, errors: LocalizedError[]): Promise<FaceRecord | null> {
   const cached = cache[entry.path];
   if (cached && cached.mtimeMs === entry.mtimeMs && cached.size === entry.size) return cached.face;
   let face: FaceRecord | null = null;
   try {
     face = await readFont(entry.path);
   } catch (error) {
-    errors.push(`${basename(entry.path)} : fichier de police illisible (${errorMessage(error)})`);
+    errors.push(new LocalizedError("scanUnreadableFont", { file: basename(entry.path), error: errorMessage(error) }));
   }
   cache[entry.path] = { mtimeMs: entry.mtimeMs, size: entry.size, face };
   return face;
@@ -73,13 +74,13 @@ export async function scanLocalFonts(folders: readonly string[]): Promise<LocalS
   const cache = await readJson(FONT_CACHE_FILE, cacheSchema, {});
   const families = new Map<string, FontFamily>();
   const files = new Map<string, FaceRecord>();
-  const errors: string[] = [];
+  const errors: LocalizedError[] = [];
   for (const folder of folders) {
     let entries: FontFileEntry[];
     try {
       entries = await walkFontFiles(folder);
     } catch (error) {
-      errors.push(`Dossier inaccessible : ${folder} (${errorMessage(error)})`);
+      errors.push(new LocalizedError("scanFolderUnreachable", { folder, error: errorMessage(error) }));
       continue;
     }
     for (const entry of entries) {
@@ -90,7 +91,7 @@ export async function scanLocalFonts(folders: readonly string[]): Promise<LocalS
     }
   }
   await writeJson(FONT_CACHE_FILE, cache).catch((error: unknown) => {
-    errors.push(`Cache des polices non enregistré (${errorMessage(error)})`);
+    errors.push(new LocalizedError("scanCacheNotSaved", { error: errorMessage(error) }));
   });
   const sorted = [...families.values()].sort((a, b) => a.family.localeCompare(b.family));
   for (const family of sorted) family.faces.sort((a, b) => a.weight - b.weight || a.style.localeCompare(b.style));

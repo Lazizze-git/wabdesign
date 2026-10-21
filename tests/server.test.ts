@@ -81,11 +81,11 @@ describe("fiche de validation", () => {
   ];
 
   it("décrit chaque modification avec de quoi retrouver l'élément", () => {
-    const brief = buildBrief(changes, new Map(), new Date("2026-10-20T12:00:00Z"));
+    const brief = buildBrief(changes, new Map(), new Date("2026-10-20T12:00:00Z"), "fr");
     expect(brief).toContain("## Retouches d'éléments");
     expect(brief).toContain('`<button class="btn btn-primary">`');
-    expect(brief).toContain("texte « Réserver »");
-    expect(brief).toContain("`border-radius` → `999px` (avant : `4px`)");
+    expect(brief).toContain("texte «\u202fRéserver\u202f»");
+    expect(brief).toContain("`border-radius` → `999px` (avant\u202f: `4px`)");
     expect(brief).toContain("- `#000000` → `#1d3557`");
     expect(brief).toContain("N'ajoute jamais `!important`");
     expect(brief).not.toContain("Fichiers de police");
@@ -102,9 +102,9 @@ describe("fiche de validation", () => {
       value: "Réserver une table",
       previous: "Réserver",
     };
-    const brief = buildBrief([text], new Map(), new Date("2026-10-20T12:00:00Z"));
+    const brief = buildBrief([text], new Map(), new Date("2026-10-20T12:00:00Z"), "fr");
     expect(brief).toContain("## Textes réécrits");
-    expect(brief).toContain("« Réserver » → « Réserver une table »");
+    expect(brief).toContain("«\u202fRéserver\u202f» → «\u202fRéserver une table\u202f»");
     expect(brief).toContain("vient de données");
   });
 });

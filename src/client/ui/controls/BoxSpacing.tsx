@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import type { StyleBinding } from "../../state/binding";
@@ -5,10 +6,10 @@ import { Icon } from "../icons";
 import { NumberField } from "./NumberField";
 
 const SIDES = [
-  { side: "top", label: "Haut" },
-  { side: "right", label: "Droite" },
-  { side: "bottom", label: "Bas" },
-  { side: "left", label: "Gauche" },
+  { side: "top", label: "box.top" },
+  { side: "right", label: "box.right" },
+  { side: "bottom", label: "box.bottom" },
+  { side: "left", label: "box.left" },
 ] as const;
 
 interface BoxSpacingProps {
@@ -41,20 +42,20 @@ export function BoxSpacing({ binding, kind, title }: BoxSpacingProps): JSX.Eleme
           class="icon-btn sm"
           aria-pressed={linked}
           onClick={() => setLinked(!linked)}
-          title={linked ? "Régler chaque côté" : "Même valeur partout"}
-          aria-label={linked ? "Régler chaque côté" : "Même valeur partout"}
+          title={linked ? t("box.unlink") : t("box.link")}
+          aria-label={linked ? t("box.unlink") : t("box.link")}
         >
           <Icon name="link" size={13} />
         </button>
       </div>
       {linked ? (
-        <NumberField label="Tous les côtés" property={`${kind}-top`} value={values[0] ?? "0px"} units={["px", "rem", "em", "%"]} min={min} onChange={setAll} />
+        <NumberField label={t("box.allSides")} property={`${kind}-top`} value={values[0] ?? "0px"} units={["px", "rem", "em", "%"]} min={min} onChange={setAll} />
       ) : (
         <div class="grid-2">
           {SIDES.map(({ side, label }, index) => (
             <NumberField
               key={side}
-              label={label}
+              label={t(label)}
               property={`${kind}-${side}`}
               value={values[index] ?? "0px"}
               units={["px", "rem", "em", "%"]}

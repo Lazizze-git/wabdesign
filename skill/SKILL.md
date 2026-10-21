@@ -1,57 +1,60 @@
 ---
 name: wabdesign
-description: Ouvre le panneau de design en direct (outil « wabdesign ») par-dessus la preview locale du projet en cours, pour tester polices, couleurs, design system, textes et retouches d'éléments, puis les valider dans le code. À utiliser quand l'utilisateur tape /wabdesign, ou demande d'« ouvrir le panneau de design », « lancer wabdesign », « tester des polices / couleurs en live sur la preview ».
-argument-hint: "[port de la preview | stop]"
+description: Opens the live design panel (the "wabdesign" tool) on top of the current project's local preview, to try fonts, colors, design-system variables, copy and element tweaks, then apply them to the code. Use when the user types /wabdesign, or asks to "open the design panel", "launch wabdesign", "try fonts / colors live on the preview" (also in French: « ouvrir le panneau de design », « lancer wabdesign »).
+argument-hint: "[preview port | stop]"
 ---
 
-# /wabdesign — ouvrir le panneau de design sur la preview
+# /wabdesign — open the design panel on the preview
 
-`wabdesign` est un relais local : il affiche la preview du projet avec un panneau par-dessus
-(Polices, Couleurs, Inspecter, Design system, Modifs). Il se lance **depuis le dossier du projet**
-(c'est ce dossier que « Valider » modifiera) et reste actif tant que la session tourne.
+`wabdesign` is a local relay: it shows the project's preview with a panel on top
+(Fonts, Colors, Inspect, Design system, Changes). It runs **from the project folder**
+(that folder is the one "Apply" will change) and stays up while the session runs.
 
-Réponds dans la langue de l'utilisateur, simplement, sans jargon technique.
+Reply in the user's language, plainly, without technical jargon.
 
-## Si l'argument est `stop`
+## If the argument is `stop`
 
-Arrête la tâche de fond `wabdesign` lancée dans cette session (et seulement elle). S'il n'y en a pas,
-trouve le processus qui écoute sur le port du panneau (`lsof -nP -iTCP:4000 -sTCP:LISTEN`), vérifie que
-c'est bien `wabdesign` pour ce projet, puis arrête-le. Confirme en une phrase. Ne touche jamais au serveur de preview.
+Stop the `wabdesign` background task started in this session (and only that one). If there is none,
+find the process listening on the panel port (`lsof -nP -iTCP:4000 -sTCP:LISTEN`), check that it is
+`wabdesign` for this project, then stop it. Confirm in one sentence. Never touch the preview server.
 
-## Sinon : ouvrir le panneau
+## Otherwise: open the panel
 
-1. **Vérifier que l'outil est installé** : `command -v wabdesign`.
-   S'il manque, proposer de l'installer (`npm install -g https://github.com/Lazizze-git/wabdesign/releases/latest/download/wabdesign.tgz`, Node 20 ou plus)
-   et l'installer si l'utilisateur accepte.
+1. **Check that the tool is installed**: `command -v wabdesign`.
+   If it is missing, offer to install it (`npm install -g https://github.com/Lazizze-git/wabdesign/releases/latest/download/wabdesign.tgz`, Node 20 or later)
+   and install it if the user agrees.
 
-2. **Lancer l'outil dans le dossier du projet**, en tâche de fond (`run_in_background: true`) :
-   - avec un port donné en argument : `wabdesign <port>` ;
-   - sinon : `wabdesign` (il trouve seul la preview lancée depuis ce dossier, et rouvre le panneau s'il tourne déjà).
+2. **Start the tool in the project folder**, as a background task (`run_in_background: true`):
+   - with a port given as argument: `wabdesign <port>`;
+   - otherwise: `wabdesign` (it finds the preview started from this folder, and reopens the panel if it is already running).
 
-   Lis ensuite la sortie de la tâche pour récupérer la ligne `Preview avec panneau de design : http://localhost:…`
-   ou `Le panneau tourne déjà pour ce projet : …`. Le navigateur s'ouvre tout seul sur cette adresse.
+   Then read the task output to get the panel address. The tool prints in English or French depending on its settings:
+   `Preview with design panel: http://localhost:…` / `Preview avec panneau de design : http://localhost:…`,
+   or `The panel is already running for this project: …` / `Le panneau tourne déjà pour ce projet : …`.
+   The browser opens on that address by itself.
 
-3. **Si la sortie dit « Aucune preview détectée »** : la preview du projet n'est pas lancée.
-   - Lis `package.json` pour trouver le script de dev (`dev`, sinon `start`).
-   - Choisis un port libre (vérifie avec `lsof -nP -iTCP:<port> -sTCP:LISTEN`), en commençant à 3000.
-   - Lance la preview en tâche de fond depuis le dossier du projet, sur ce port :
-     Next.js `npm run dev -- -p <port>` · Vite / Astro `npm run dev -- --port <port>` · autre : le script tel quel.
-   - Attends la ligne « Ready » / « Local: » dans sa sortie, puis lance `wabdesign <port>` en tâche de fond (étape 2).
-   - Si `node_modules` manque, lance d'abord `npm install`.
+3. **If the output says "No preview detected" / « Aucune preview détectée »**: the project's preview is not running.
+   - Read `package.json` to find the dev script (`dev`, otherwise `start`).
+   - Pick a free port (check with `lsof -nP -iTCP:<port> -sTCP:LISTEN`), starting at 3000.
+   - Start the preview as a background task from the project folder, on that port:
+     Next.js `npm run dev -- -p <port>` · Vite / Astro `npm run dev -- --port <port>` · otherwise: the script as is.
+   - Wait for the "Ready" / "Local:" line in its output, then start `wabdesign <port>` in the background (step 2).
+   - If `node_modules` is missing, run `npm install` first.
 
-4. **Si la sortie signale « Aucune preview lancée depuis ce dossier : j'utilise celle du port … »**,
-   vérifie que ce port correspond bien à ce projet. Sinon, arrête cette tâche et applique l'étape 3.
+4. **If the output says "No preview started from this folder: using the one on port …"** (« Aucune preview lancée depuis ce dossier »),
+   check that this port belongs to this project. If not, stop that task and follow step 3.
 
-## Message final (court)
+## Final message (short)
 
-- l'adresse à utiliser (ex. `http://localhost:4000`), en précisant que c'est celle-là et pas celle de la preview seule ;
-- les raccourcis : **⌥ D** afficher/cacher · **⌥ S** cliquer un élément · **⌥ A** (maintenir) voir l'original · **⌘ Z** annuler
-  (Alt et Ctrl sous Windows et Linux) ;
-- « Valider » applique les modifications dans le code. Si le projet n'a pas de sauvegarde Git
-  (`git rev-parse --is-inside-work-tree` échoue), le signaler en une phrase et proposer d'en créer une avant de valider.
+- the address to use (e.g. `http://localhost:4000`), making clear it is this one and not the bare preview;
+- the shortcuts: **⌥ D** show/hide · **⌥ S** pick an element · **⌥ A** (hold) show original · **⌘ Z** undo
+  (Alt and Ctrl on Windows and Linux);
+- the panel follows the browser language (English or French) and can be switched in its settings (gear icon);
+- "Apply" writes the changes into the code. If the project has no Git backup
+  (`git rev-parse --is-inside-work-tree` fails), say so in one sentence and offer to create one before applying.
 
-## En cas de problème
+## If something goes wrong
 
-- La page affiche une erreur du site (clés manquantes, base de données…) : c'est le projet, pas l'outil. Le dire clairement ;
-  le panneau reste utilisable sur ce qui s'affiche.
-- « Port occupé » ou outil introuvable : relancer l'étape correspondante, ne jamais arrêter un processus qui n'appartient pas à ce projet.
+- The page shows an error from the site itself (missing keys, database…): that is the project, not the tool. Say so clearly;
+  the panel still works on whatever is displayed.
+- "Port in use" or tool not found: redo the matching step; never stop a process that does not belong to this project.

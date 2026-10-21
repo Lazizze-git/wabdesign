@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import type { JSX } from "preact";
 import type { TargetScope } from "../../../shared/types";
 import { createBinding } from "../../state/binding";
@@ -27,7 +28,7 @@ function PickButton(): JSX.Element {
       onClick={() => (inspecting.value ? stopInspecting() : startInspecting())}
     >
       <Icon name="cursor" size={14} />
-      {inspecting.value ? "Clique un élément dans la page… (Échap)" : "Sélectionner un élément"}
+      {inspecting.value ? t("inspect.picking") : t("inspect.pick")}
     </button>
   );
 }
@@ -39,10 +40,7 @@ export function InspectTab(): JSX.Element {
     return (
       <section class="section stack">
         <PickButton />
-        <p class="hint">
-          Clique un bouton, un titre, un bloc… puis règle sa police, ses couleurs, son arrondi et ses espacements. Tu choisis ensuite si ça
-          s’applique à cet élément seulement ou à tous les éléments du même genre.
-        </p>
+        <p class="hint">{t("inspect.intro")}</p>
       </section>
     );
   }
@@ -59,15 +57,15 @@ export function InspectTab(): JSX.Element {
           <span class="grow truncate" title={target.selector} style="font-weight:600">
             {target.label}
           </span>
-          <button type="button" class="icon-btn sm" onClick={selectParent} title="Sélectionner le parent" aria-label="Sélectionner le parent">
+          <button type="button" class="icon-btn sm" onClick={selectParent} title={t("inspect.parent")} aria-label={t("inspect.parent")}>
             <Icon name="up" size={13} />
           </button>
-          <button type="button" class="icon-btn sm" onClick={() => select(null)} title="Désélectionner" aria-label="Désélectionner">
+          <button type="button" class="icon-btn sm" onClick={() => select(null)} title={t("inspect.deselect")} aria-label={t("inspect.deselect")}>
             <Icon name="close" size={13} />
           </button>
         </div>
         <Segmented<TargetScope>
-          label="Portée"
+          label={t("inspect.scope")}
           options={options.map((option) => ({
             value: option.scope,
             label: option.scope === "element" ? option.label : `${option.label} · ${option.count}`,
@@ -81,14 +79,14 @@ export function InspectTab(): JSX.Element {
             {target.selector}
           </span>
           <button type="button" class="btn btn-ghost" onClick={resetAll}>
-            Tout rétablir
+            {t("common.resetAll")}
           </button>
         </div>
       </section>
       <TextContent key={target.selector} element={element} />
       <section class="section">
         <div class="section-head">
-          <span class="section-title">Typographie</span>
+          <span class="section-title">{t("inspect.typography")}</span>
         </div>
         <TypeControls binding={binding} title={target.label} showSize />
       </section>

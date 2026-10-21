@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { fontFamilyValue } from "../../../shared/css";
@@ -68,7 +69,7 @@ export function TokenRow({ token }: { token: ClassifiedToken }): JSX.Element {
       <div class="stack" style="gap:2px">
         <TextField label={friendlyTokenName(token.name)} code={token.name} value={change?.value ?? token.value} changed={changed} onChange={(next) => setToken(token, next)} />
         <span class="hint" style="margin:0">
-          Calculée à partir de {sources.join(", ")} = {original}
+          {t("system.derived", { sources: sources.join(", "), value: original })}
         </span>
       </div>
     );
@@ -96,7 +97,7 @@ export function TokenRow({ token }: { token: ClassifiedToken }): JSX.Element {
         {control}
       </div>
       {changed && (
-        <button type="button" class="icon-btn" onClick={() => resetToken(token)} title={`Rétablir ${original}`} aria-label="Rétablir">
+        <button type="button" class="icon-btn" onClick={() => resetToken(token)} title={t("system.resetTo", { value: original })} aria-label={t("common.reset")}>
           <Icon name="undo" size={14} />
         </button>
       )}

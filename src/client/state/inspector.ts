@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import { computed, signal } from "@preact/signals";
 import type { Target, TargetScope } from "../../shared/types";
 import { countMatches, describeElement, humanLabel, similarSelector, uniqueSelector } from "../engine/selector";
@@ -20,13 +21,13 @@ export interface ScopeOption {
 
 export function scopeOptions(element: Element): ScopeOption[] {
   const tag = element.tagName.toLowerCase();
-  const options: ScopeOption[] = [{ scope: "element", selector: uniqueSelector(element), label: "Cet élément", count: 1 }];
+  const options: ScopeOption[] = [{ scope: "element", selector: uniqueSelector(element), label: t("inspect.scopeElement"), count: 1 }];
   const similar = similarSelector(element);
   const similarCount = similar ? countMatches(similar) : 0;
   if (similar && similarCount > 1) {
-    options.push({ scope: "similar", selector: similar, label: "Similaires", count: similarCount });
+    options.push({ scope: "similar", selector: similar, label: t("inspect.scopeSimilar"), count: similarCount });
   }
-  options.push({ scope: "tag", selector: tag, label: `Tous les <${tag}>`, count: countMatches(tag) });
+  options.push({ scope: "tag", selector: tag, label: t("inspect.scopeTag", { tag }), count: countMatches(tag) });
   return options;
 }
 

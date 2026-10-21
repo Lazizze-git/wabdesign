@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import { fontFamilyValue } from "../../shared/css";
 import type { Change, FontFamily, FontRole, Pairing, RoleFont } from "../../shared/types";
 import { loadFamily } from "../engine/font-loader";
@@ -33,7 +34,7 @@ export function applyPairing(pairing: Pairing): void {
     if (!setting) continue;
     const family = findFamily(setting.font);
     if (!family) {
-      notify(`${setting.font.family} n’est plus disponible`, "error");
+      notify(t("fonts.pairingMissing", { family: setting.font.family }), "error");
       continue;
     }
     loadFamily(family);
@@ -55,12 +56,12 @@ export function saveCurrentPairing(): void {
   }
   const names = Object.values(roles).map((setting) => setting.font.family);
   if (names.length === 0) {
-    notify("Choisis d’abord au moins une police pour un rôle", "error");
+    notify(t("fonts.pairingNeedsFont"), "error");
     return;
   }
   const pairing: Pairing = { id: uid("pair"), name: [...new Set(names)].join(" + "), roles };
   void updateConfig((current) => ({ ...current, pairings: [pairing, ...current.pairings] }));
-  notify("Combinaison enregistrée");
+  notify(t("fonts.pairingSaved"));
 }
 
 export function deletePairing(id: string): void {
@@ -81,7 +82,7 @@ export function shufflePairing(): void {
   const headings = randomItem(pool);
   const body = randomItem(pool.filter((family) => family !== headings)) ?? headings;
   if (!headings || !body) {
-    notify("Pas assez de polices pour mélanger", "error");
+    notify(t("fonts.shuffleNotEnough"), "error");
     return;
   }
   loadFamily(headings);

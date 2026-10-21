@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useRef, useState } from "preact/hooks";
 import { formatLength, isValidCss, parseLength, roundTo } from "../../engine/css-value";
@@ -107,8 +108,8 @@ export function NumberField(props: NumberFieldProps): JSX.Element {
           onKeyDown={onKeyDown}
         />
         {parsed && (units.length > 1 || unit !== "") && (
-          <button type="button" class="unit" onClick={cycleUnit} title="Changer d’unité">
-            {unit || "ratio"}
+          <button type="button" class="unit" onClick={cycleUnit} title={t("field.unit")}>
+            {unit || t("field.ratio")}
           </button>
         )}
       </span>

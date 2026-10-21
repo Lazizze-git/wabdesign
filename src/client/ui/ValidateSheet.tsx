@@ -2,6 +2,7 @@ import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import type { ValidateEvent, ValidateMode } from "../../shared/types";
 import { validate } from "../api";
+import { t, tn } from "../i18n";
 import { changes, clearChanges } from "../state/changes";
 import { status } from "../state/library";
 import { Icon } from "./icons";
@@ -26,7 +27,7 @@ export function ValidateSheet({ onClose }: { onClose: () => void }): JSX.Element
       });
       if (finished === "done" && mode === "claude") clearChanges();
     } catch (error) {
-      setLog((current) => [...current, { type: "error", message: error instanceof Error ? error.message : "Erreur inconnue" }]);
+      setLog((current) => [...current, { type: "error", message: error instanceof Error ? error.message : t("common.unknownError") }]);
     }
     setPhase(finished);
   };
@@ -34,26 +35,23 @@ export function ValidateSheet({ onClose }: { onClose: () => void }): JSX.Element
   return (
     <div class="sheet">
       <div class="sheet-head">
-        <button type="button" class="icon-btn" onClick={onClose} disabled={phase === "running"} aria-label="Retour">
+        <button type="button" class="icon-btn" onClick={onClose} disabled={phase === "running"} aria-label={t("common.back")}>
           <Icon name="back" />
         </button>
-        <span class="section-title">Valider {count} modification{count > 1 ? "s" : ""}</span>
+        <span class="section-title">{tn(count, "validate.title.one", "validate.title.other")}</span>
       </div>
       <div class="body section stack">
         {phase === "choose" && (
           <>
-            <p class="hint">
-              Claude Code va reporter ces modifications dans le code du projet, au bon endroit (variables, thème, composants), et copier
-              les polices locales utilisées. Tu peux suivre son travail ici.
-            </p>
+            <p class="hint">{t("validate.intro")}</p>
             <button type="button" class="btn btn-primary btn-block" disabled={!claude} onClick={() => void run("claude")}>
-              <Icon name="check" size={14} /> Appliquer dans le code
+              <Icon name="check" size={14} /> {t("validate.apply")}
             </button>
-            {!claude && <p class="hint">Claude Code est introuvable sur ce Mac : seule la fiche peut être enregistrée.</p>}
+            {!claude && <p class="hint">{t("validate.noClaude")}</p>}
             <button type="button" class="btn btn-block" onClick={() => void run("export")}>
-              Enregistrer seulement la fiche
+              {t("validate.exportOnly")}
             </button>
-            <p class="hint">La fiche (dossier .design-tool du projet) décrit chaque modification ; tu pourras la donner à Claude plus tard.</p>
+            <p class="hint">{t("validate.exportHint")}</p>
           </>
         )}
         {phase !== "choose" && (
@@ -63,12 +61,12 @@ export function ValidateSheet({ onClose }: { onClose: () => void }): JSX.Element
                 {event.message}
               </div>
             ))}
-            {phase === "running" && <div class="log-line">En cours… (ça peut prendre une minute)</div>}
+            {phase === "running" && <div class="log-line">{t("validate.running")}</div>}
           </div>
         )}
         {(phase === "done" || phase === "error") && (
           <button type="button" class="btn btn-block" onClick={onClose}>
-            Fermer
+            {t("common.close")}
           </button>
         )}
       </div>

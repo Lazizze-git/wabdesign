@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { fontFamilyValue } from "../../../shared/css";
@@ -54,13 +55,13 @@ export function TypeControls({ binding, title, showSize = false }: TypeControlsP
     <div class="stack">
       <div class="field">
         <span class="label">
-          Police{binding.isChanged("font-family") && <span class="changed"> •</span>}
+          {t("type.font")}{binding.isChanged("font-family") && <span class="changed"> •</span>}
         </span>
         <button type="button" class="picker-btn" onClick={() => setPicking(true)}>
           <span class="font-name" style={{ fontFamily: familyCss, fontSize: "15px" }}>
-            {family?.family ?? (firstFamilyName(familyCss) || "Police du site")}
+            {family?.family ?? (firstFamilyName(familyCss) || t("type.siteFont"))}
           </span>
-          {!family && <span class="tag">du site</span>}
+          {!family && <span class="tag">{t("type.fromSite")}</span>}
         </button>
       </div>
       <WeightControl
@@ -80,15 +81,15 @@ export function TypeControls({ binding, title, showSize = false }: TypeControlsP
       )}
       <div class="grid-2">
         {showSize && (
-          <NumberField label="Taille" property="font-size" value={binding.get("font-size")} units={["px", "rem", "em"]} min={1}
+          <NumberField label={t("type.size")} property="font-size" value={binding.get("font-size")} units={["px", "rem", "em"]} min={1}
             changed={binding.isChanged("font-size")} onChange={(value) => binding.set("font-size", value)} />
         )}
-        <NumberField label="Interligne" property="line-height" value={lineHeightValue(binding)} units={["", "px", "em"]} step={0.05} min={0}
+        <NumberField label={t("type.lineHeight")} property="line-height" value={lineHeightValue(binding)} units={["", "px", "em"]} step={0.05} min={0}
           changed={binding.isChanged("line-height")} onChange={(value) => binding.set("line-height", value)} />
-        <NumberField label="Interlettrage" property="letter-spacing" value={letterSpacingValue(binding)} units={["em", "px"]} step={0.005}
+        <NumberField label={t("type.letterSpacing")} property="letter-spacing" value={letterSpacingValue(binding)} units={["em", "px"]} step={0.005}
           changed={binding.isChanged("letter-spacing")} onChange={(value) => binding.set("letter-spacing", value)} />
       </div>
-      <Segmented label="Casse" options={CASES} value={CASES.some((c) => c.value === textCase) ? textCase : "none"}
+      <Segmented label={t("type.case")} options={CASES} value={CASES.some((c) => c.value === textCase) ? textCase : "none"}
         onChange={(value) => binding.set("text-transform", value)} />
       {picking && <FontSheet title={title} value={family ?? null} onPick={pick} onClose={() => setPicking(false)} />}
     </div>

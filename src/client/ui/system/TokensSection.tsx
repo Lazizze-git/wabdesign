@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { matchesToken } from "../../engine/token-names";
@@ -28,14 +29,14 @@ function TokenGroup({ group, tokens, searching }: GroupProps): JSX.Element {
   return (
     <section class="section">
       <div class="section-head" style={expanded ? undefined : "margin:0"}>
-        <button type="button" class="icon-btn sm" aria-expanded={expanded} onClick={() => setOpen(!open)} aria-label={expanded ? "Replier" : "Déplier"}>
+        <button type="button" class="icon-btn sm" aria-expanded={expanded} onClick={() => setOpen(!open)} aria-label={expanded ? t("fonts.collapse") : t("fonts.expand")}>
           <Icon name={expanded ? "minimize" : "plus"} size={14} />
         </button>
-        <span class="section-title">{group.title}</span>
+        <span class="section-title">{t(group.title)}</span>
         <span class="muted">{tokens.length}</span>
         {expanded && (
           <button type="button" class="btn btn-ghost" onClick={reset}>
-            Rétablir
+            {t("common.reset")}
           </button>
         )}
       </div>
@@ -46,7 +47,7 @@ function TokenGroup({ group, tokens, searching }: GroupProps): JSX.Element {
           ))}
           {!showAll && !searching && tokens.length > PREVIEW_COUNT && (
             <button type="button" class="btn btn-ghost btn-block" onClick={() => setShowAll(true)}>
-              Voir les {tokens.length} variables
+              {t("system.showAll", { n: tokens.length })}
             </button>
           )}
         </div>
@@ -64,10 +65,7 @@ export function TokensSection(): JSX.Element {
   if (designTokens.value.length === 0) {
     return (
       <section class="section">
-        <p class="hint" style="margin:0">
-          Ce site ne définit aucune variable CSS : ses valeurs sont écrites directement dans les styles. Utilise les réglages par type
-          d’élément ci-dessous, ou l’onglet Inspecter.
-        </p>
+        <p class="hint" style="margin:0">{t("system.noTokens")}</p>
       </section>
     );
   }
@@ -75,17 +73,15 @@ export function TokensSection(): JSX.Element {
   return (
     <>
       <section class="section stack">
-        <p class="hint" style="margin:0">
-          Les variables du site ({designTokens.value.length}). En changer une modifie tout ce qui l’utilise, partout.
-        </p>
-        <input class="input" placeholder="Chercher (ex. arrondi, accent, titre)" value={query} onInput={(e) => setQuery(e.currentTarget.value)} />
+        <p class="hint" style="margin:0">{t("system.tokensHint", { n: designTokens.value.length })}</p>
+        <input class="input" placeholder={t("system.search")} value={query} onInput={(e) => setQuery(e.currentTarget.value)} />
       </section>
       {TOKEN_GROUPS.map((group) => {
         const items = tokens.filter((token) => group.kinds.includes(token.kind));
         if (items.length === 0) return null;
         return <TokenGroup key={group.id} group={group} tokens={items} searching={search !== ""} />;
       })}
-      {tokens.length === 0 && <p class="empty">Aucune variable ne correspond.</p>}
+      {tokens.length === 0 && <p class="empty">{t("system.noMatch")}</p>}
     </>
   );
 }

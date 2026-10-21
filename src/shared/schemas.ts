@@ -42,6 +42,7 @@ export const sessionSchema = z.object({
 const hexOrCss = z.string().min(1).max(100);
 
 export const configSchema = z.object({
+  language: z.enum(["auto", "fr", "en"]).default("auto"),
   fontFolders: z.array(z.string().min(1).max(1000)).max(50),
   googleFonts: z.boolean(),
   palettes: z
@@ -74,10 +75,12 @@ export const configSchema = z.object({
 
 export const validateSchema = z.object({
   mode: z.enum(["claude", "export"]),
+  language: z.enum(["fr", "en"]).default("fr"),
   changes: z.array(changeSchema).min(1).max(2000),
 });
 
 export const DEFAULT_CONFIG: z.infer<typeof configSchema> = {
+  language: "auto",
   fontFolders: [],
   googleFonts: true,
   palettes: [],

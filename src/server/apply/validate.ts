@@ -1,9 +1,10 @@
 import { writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
-import type { Change, ValidateEvent, ValidateMode } from "../../shared/types";
+import type { Change, Language, ValidateEvent, ValidateMode } from "../../shared/types";
 import type { FontService } from "../fonts/font-service";
 import type { FaceRecord } from "../fonts/read-font";
-import { errorMessage, logger } from "../logger";
+import { describeError, msg, tm } from "../i18n";
+import { logger } from "../logger";
 import { ensureProjectDir } from "../stores";
 import { buildBrief } from "./brief";
 import { runClaude } from "./claude-runner";
@@ -30,9 +31,10 @@ export async function validateChanges(
   mode: ValidateMode,
   fonts: FontService,
   emit: (event: ValidateEvent) => void,
+  language: Language,
 ): Promise<void> {
   if (running) {
-    emit({ type: "error", message: "Une validation est déjà en cours." });
+    emit({ type: "error", message: msg(language, "validateBusy") });
     return;
   }
   running = true;
@@ -40,29 +42,29 @@ export async function validateChanges(
     const now = new Date();
     const dir = await ensureProjectDir(projectDir);
     const base = join(dir, `changes-${stamp(now)}`);
-    const brief = buildBrief(changes, localFontFiles(changes, fonts), now);
+    const brief = buildBrief(changes, localFontFiles(changes, fonts), now, language);
     await writeFile(`${base}.md`, brief, "utf8");
     await writeFile(`${base}.json`, `${JSON.stringify(changes, null, 2)}\n`, "utf8");
     const file = relative(projectDir, `${base}.md`);
-    emit({ type: "step", message: `Fiche enregistrée : ${file}` });
+    emit({ type: "step", message: msg(language, "briefSaved", { file }) });
     if (mode === "export") {
-      emit({ type: "done", message: "Fiche prête. Demande à Claude Code de l’appliquer.", file });
+      emit({ type: "done", message: msg(language, "exportDone"), file });
       return;
     }
-    emit({ type: "step", message: "Claude Code applique les modifications dans le code…" });
-    logger.info(`Application des modifications par Claude Code (${file})`);
-    const prompt = `Lis le fichier ${file} et applique dans le code source de ce projet les modifications de design qu’il décrit, en suivant ses consignes à la lettre.`;
-    const summary = await runClaude(prompt, projectDir, {
+    emit({ type: "step", message: msg(language, "claudeApplying") });
+    logger.info(tm("validateLog", { file }));
+    const prompt = msg(language, "claudePrompt", { file });
+    const summary = await runClaude(prompt, projectDir, language, {
       onStep: (message) => {
         logger.detail(message);
         emit({ type: "step", message });
       },
     });
-    emit({ type: "done", message: summary || "Modifications appliquées.", file });
-    logger.info("Modifications appliquées dans le code.");
+    emit({ type: "done", message: summary || msg(language, "validateDone"), file });
+    logger.info(tm("validateDoneLog"));
   } catch (error) {
-    logger.error("La validation a échoué", error);
-    emit({ type: "error", message: errorMessage(error) });
+    logger.error(tm("validateFailedLog"), error);
+    emit({ type: "error", message: describeError(error, language) });
   } finally {
     running = false;
   }

@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import type { JSX } from "preact";
 import type { FontFamily } from "../../../shared/types";
 import { weightName } from "../../engine/css-value";
@@ -22,7 +23,7 @@ export function WeightControl({ family, weight, italic, changed, onWeight, onIta
   return (
     <div class="field">
       <span class="label">
-        Graisse{changed && <span class="changed"> •</span>}
+        {t("type.weight")}{changed && <span class="changed"> •</span>}
       </span>
       <div class="row">
         {range ? (
@@ -35,7 +36,7 @@ export function WeightControl({ family, weight, italic, changed, onWeight, onIta
               step={1}
               value={weight}
               onInput={(event) => onWeight(Number(event.currentTarget.value))}
-              aria-label="Graisse"
+              aria-label={t("type.weight")}
             />
             <span class="mono" style="width:30px;text-align:right">{weight}</span>
           </>
@@ -44,7 +45,7 @@ export function WeightControl({ family, weight, italic, changed, onWeight, onIta
             class="select grow"
             value={String(weight)}
             onChange={(event) => onWeight(Number(event.currentTarget.value))}
-            aria-label="Graisse"
+            aria-label={t("type.weight")}
           >
             {!options.includes(weight) && <option value={String(weight)}>{weightName(weight)}</option>}
             {options.map((value) => (
@@ -59,7 +60,7 @@ export function WeightControl({ family, weight, italic, changed, onWeight, onIta
           class="icon-btn"
           aria-pressed={italic}
           disabled={!hasItalic && !italic}
-          title={hasItalic ? "Italique" : "Pas d’italique dans cette famille"}
+          title={hasItalic ? t("type.italic") : t("type.noItalic")}
           onClick={() => onItalic(!italic)}
           style="font-style:italic;font-family:Georgia,serif;font-size:15px"
         >

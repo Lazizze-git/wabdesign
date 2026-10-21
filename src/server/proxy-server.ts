@@ -6,7 +6,8 @@ import { handleApi, type ApiContext } from "./api";
 import { forwardHeaders, sendInjectedHtml, sendPassthrough } from "./html-response";
 import { HttpError, isTrustedRequest, sendJson } from "./http-utils";
 import { PANEL_PATH } from "./inject";
-import { errorMessage, logger } from "./logger";
+import { describeError, msg, requestLanguage, tm } from "./i18n";
+import { logger } from "./logger";
 
 export interface ProxyOptions {
   targetPort: number;
@@ -18,11 +19,12 @@ export interface ProxyOptions {
 const API_PREFIX = "/__design/api";
 const PANEL_FILE = new URL("./panel.js", import.meta.url);
 
-function unreachablePage(targetOrigin: string): string {
-  return `<!doctype html><meta charset="utf-8"><title>Preview introuvable</title>
+function unreachablePage(targetOrigin: string, req: IncomingMessage): string {
+  const language = requestLanguage(req);
+  return `<!doctype html><html lang="${language}"><meta charset="utf-8"><title>${msg(language, "previewDownTitle")}</title>
 <body style="font:16px/1.5 -apple-system, BlinkMacSystemFont, sans-serif;padding:48px;max-width:560px">
-<h1 style="font-size:20px">La preview ne répond pas</h1>
-<p>Aucun serveur ne répond sur <b>${targetOrigin}</b>. Relance ton serveur de développement, puis recharge cette page.</p>`;
+<h1 style="font-size:20px">${msg(language, "previewDownHeading")}</h1>
+<p>${msg(language, "previewDownBody", { origin: targetOrigin })}</p>`;
 }
 
 async function servePanel(res: ServerResponse): Promise<void> {
@@ -59,10 +61,10 @@ export function startProxy(options: ProxyOptions): Promise<Server> {
     if (isHtml) sendInjectedHtml(proxyRes, res, headers);
     else sendPassthrough(proxyRes, res, headers);
   });
-  proxy.on("error", (_error, _req, res) => {
+  proxy.on("error", (_error, req, res) => {
     if ("writeHead" in res && !res.headersSent) {
       res.writeHead(502, { "content-type": "text/html; charset=utf-8" });
-      res.end(unreachablePage(targetOrigin));
+      res.end(unreachablePage(targetOrigin, req));
     } else {
       res.destroy();
     }
@@ -71,12 +73,12 @@ export function startProxy(options: ProxyOptions): Promise<Server> {
   const server = createServer((req, res) => {
     const url = req.url ?? "/";
     if (!url.startsWith("/__design/")) return proxy.web(req, res);
-    if (!isTrustedRequest(req, options.port)) return sendJson(res, 403, { error: "Accès refusé" });
-    const task = url === PANEL_PATH ? servePanel(res) : url.startsWith(API_PREFIX) ? handleApi(req, res, url.slice(API_PREFIX.length), ctx) : Promise.reject(new HttpError(404, "Introuvable"));
+    if (!isTrustedRequest(req, options.port)) return sendJson(res, 403, { error: msg(requestLanguage(req), "errAccessDenied") });
+    const task = url === PANEL_PATH ? servePanel(res) : url.startsWith(API_PREFIX) ? handleApi(req, res, url.slice(API_PREFIX.length), ctx) : Promise.reject(new HttpError(404, "errNotFound"));
     task.catch((error: unknown) => {
       const status = error instanceof HttpError ? error.status : 500;
-      if (status === 500) logger.error("Erreur du serveur local", error);
-      if (!res.headersSent) sendJson(res, status, { error: errorMessage(error) });
+      if (status === 500) logger.error(tm("serverError"), error);
+      if (!res.headersSent) sendJson(res, status, { error: describeError(error, requestLanguage(req)) });
       else res.end();
     });
   });

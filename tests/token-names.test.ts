@@ -1,7 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { friendlyTokenName, matchesToken, usageLabel } from "../src/client/engine/token-names";
+import { languageSetting } from "../src/client/i18n";
 
 describe("noms lisibles des variables", () => {
+  beforeAll(() => {
+    languageSetting.value = "fr";
+  });
+  afterAll(() => {
+    languageSetting.value = "auto";
+  });
+
   it.each([
     ["--color-encre-2", "Encre 2"],
     ["--color-bleu-survol", "Bleu survol"],
@@ -29,5 +37,29 @@ describe("noms lisibles des variables", () => {
     expect(matchesToken("--radius", "arrondi")).toBe(true);
     expect(matchesToken("--color-encre", "--color")).toBe(true);
     expect(matchesToken("--color-encre", "papier")).toBe(false);
+  });
+});
+
+describe("noms lisibles en anglais", () => {
+  beforeAll(() => {
+    languageSetting.value = "en";
+  });
+  afterAll(() => {
+    languageSetting.value = "auto";
+  });
+
+  it.each([
+    ["--color-encre-2", "Encre 2"],
+    ["--radius", "Radius"],
+    ["--font-weight-texte", "Weight texte"],
+    ["--spacing", "Base spacing"],
+  ])("%s → %s", (name, label) => {
+    expect(friendlyTokenName(name)).toBe(label);
+  });
+
+  it("compte les usages en anglais", () => {
+    expect(usageLabel(0)).toBe("unused");
+    expect(usageLabel(1)).toBe("1 use");
+    expect(usageLabel(3)).toBe("3 uses");
   });
 });

@@ -1,3 +1,4 @@
+import { t, type MessageKey } from "../i18n";
 import type { ElementContext } from "../../shared/types";
 
 /** Les identifiants générés (React `:r1:`, `radix-…`) changent d'un rendu à l'autre : on les évite. */
@@ -67,29 +68,30 @@ export function describeElement(element: Element, selector: string): ElementCont
   };
 }
 
-const TAG_NAMES: Record<string, string> = {
-  a: "Lien",
-  button: "Bouton",
-  p: "Paragraphe",
-  img: "Image",
-  input: "Champ",
-  textarea: "Champ",
-  select: "Liste",
-  li: "Élément de liste",
-  ul: "Liste",
-  nav: "Navigation",
-  header: "En-tête",
-  footer: "Pied de page",
-  section: "Section",
-  span: "Texte",
-  label: "Libellé",
+const TAG_NAMES: Record<string, MessageKey> = {
+  a: "el.a",
+  button: "el.button",
+  p: "el.p",
+  img: "el.img",
+  input: "el.input",
+  textarea: "el.input",
+  select: "el.select",
+  li: "el.li",
+  ul: "el.ul",
+  nav: "el.nav",
+  header: "el.header",
+  footer: "el.footer",
+  section: "el.section",
+  span: "el.span",
+  label: "el.label",
 };
 
 /** Nom lisible d'un élément : « Bouton « Réserver » », « Titre h2 « Nos vins » »… */
 export function humanLabel(element: Element): string {
   const tag = element.tagName.toLowerCase();
-  const base = /^h[1-6]$/.test(tag) ? `Titre ${tag}` : (TAG_NAMES[tag] ?? `Bloc <${tag}>`);
+  const name = TAG_NAMES[tag];
+  const base = /^h[1-6]$/.test(tag) ? t("el.heading", { tag }) : name ? t(name) : t("el.block", { tag });
   const text = shortText(element);
   if (!text || text.length > 40) return base;
-  return `${base} « ${text} »`;
+  return t("el.quoted", { base, text });
 }

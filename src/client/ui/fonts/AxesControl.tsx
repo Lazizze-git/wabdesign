@@ -1,15 +1,21 @@
+import { t, type MessageKey } from "../../i18n";
 import type { JSX } from "preact";
 import type { FontAxis } from "../../../shared/types";
 
-const AXIS_NAMES: Record<string, string> = {
-  wdth: "Largeur",
-  opsz: "Taille optique",
-  slnt: "Inclinaison",
-  GRAD: "Grade",
-  CASL: "Décontracté",
-  SOFT: "Douceur",
-  MONO: "Chasse fixe",
+const AXIS_NAMES: Record<string, MessageKey> = {
+  wdth: "axis.wdth",
+  opsz: "axis.opsz",
+  slnt: "axis.slnt",
+  GRAD: "axis.GRAD",
+  CASL: "axis.CASL",
+  SOFT: "axis.SOFT",
+  MONO: "axis.MONO",
 };
+
+function axisName(tag: string): string {
+  const key = AXIS_NAMES[tag];
+  return key ? t(key) : tag;
+}
 
 /** « "wdth" 90, "opsz" 32 » → { wdth: 90, opsz: 32 } */
 export function parseVariationSettings(value: string): Record<string, number> {
@@ -46,7 +52,7 @@ export function AxesControl({ axes, value, onChange }: AxesControlProps): JSX.El
         return (
           <label class="field" key={axis.tag}>
             <span class="label row">
-              <span class="grow">{AXIS_NAMES[axis.tag] ?? axis.tag}</span>
+              <span class="grow">{axisName(axis.tag)}</span>
               <span class="mono">{axisValue}</span>
             </span>
             <input

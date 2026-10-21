@@ -1,5 +1,5 @@
-import type { Config, FontsResponse } from "../../shared/types";
-import { errorMessage } from "../logger";
+import type { Config, FontsResponse, Language } from "../../shared/types";
+import { describeError, LocalizedError } from "../i18n";
 import { loadGoogleFonts } from "./google-library";
 import type { FaceRecord } from "./read-font";
 import { scanLocalFonts, type LocalScan } from "./local-library";
@@ -24,15 +24,15 @@ export class FontService {
     }
   }
 
-  async list(config: Config, force = false): Promise<FontsResponse> {
+  async list(config: Config, language: Language, force = false): Promise<FontsResponse> {
     const local = await this.local(config.fontFolders, force);
-    const errors = [...local.errors];
+    const errors = local.errors.map((error) => describeError(error, language));
     let google: FontsResponse["google"] = [];
     if (config.googleFonts) {
       try {
         google = await loadGoogleFonts();
       } catch (error) {
-        errors.push(`Google Fonts indisponible (${errorMessage(error)})`);
+        errors.push(describeError(new LocalizedError("googleUnavailable", { error: describeError(error, language) }), language));
       }
     }
     return { local: local.families, google, errors };

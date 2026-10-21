@@ -1,3 +1,4 @@
+import { languageSetting, t } from "../i18n";
 import { computed, signal } from "@preact/signals";
 import type { Config, FontFamily, FontRef, FontsResponse, StatusResponse } from "../../shared/types";
 import { api } from "../api";
@@ -22,7 +23,7 @@ export async function loadFonts(refresh = false): Promise<void> {
     fonts.value = await api.fonts(refresh);
     for (const error of fonts.value.errors.slice(0, 3)) notify(error, "error");
   } catch (error) {
-    notify(`Polices indisponibles : ${error instanceof Error ? error.message : "erreur inconnue"}`, "error");
+    notify(t("fonts.unavailable", { reason: error instanceof Error ? error.message : t("common.unknownError") }), "error");
   } finally {
     fontsLoading.value = false;
   }
@@ -40,7 +41,7 @@ export async function updateConfig(update: (current: Config) => Config): Promise
     if (foldersChanged || next.googleFonts !== current.googleFonts) await loadFonts(true);
   } catch (error) {
     config.value = current;
-    notify(`Réglage non enregistré : ${error instanceof Error ? error.message : "erreur inconnue"}`, "error");
+    notify(t("state.settingNotSaved", { reason: error instanceof Error ? error.message : t("common.unknownError") }), "error");
   }
 }
 
@@ -48,9 +49,10 @@ export async function loadLibrary(): Promise<void> {
   try {
     const [loadedConfig, loadedStatus] = await Promise.all([api.config(), api.status()]);
     config.value = loadedConfig;
+    languageSetting.value = loadedConfig.language ?? "auto";
     status.value = loadedStatus;
   } catch (error) {
-    notify(`Serveur de l’outil injoignable : ${error instanceof Error ? error.message : ""}`, "error");
+    notify(t("state.serverUnreachable", { reason: error instanceof Error ? error.message : "" }), "error");
     return;
   }
   await loadFonts();
