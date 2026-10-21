@@ -18,7 +18,7 @@ describe("classement des variables", () => {
     ["--spacing", "0.25rem", "spacing"],
     ["--shadow-md", "0 4px 6px -1px rgb(0 0 0 / 0.1)", "shadow"],
     ["--container-lg", "32rem", "layout"],
-    ["--ease-out", "cubic-bezier(0, 0, 0.2, 1)", "other"],
+    ["--ease-out", "cubic-bezier(0, 0, 0.2, 1)", "motion"],
   ])("%s → %s", (name, value, kind) => {
     expect(classifyToken(name, value, isColor)).toBe(kind);
   });
@@ -34,5 +34,20 @@ describe("classement des variables", () => {
     expect(stepFor("1.25", "leading")).toBe(0.05);
     expect(stepFor("0.625rem", "radius")).toBe(0.0625);
     expect(stepFor("4px", "radius")).toBe(1);
+  });
+});
+
+describe("classement des noms français", () => {
+  it.each([
+    ["--gouttiere", "16px", "spacing"],
+    ["--largeur-image", "40vw", "layout"],
+    ["--delai", "120ms", "motion"],
+    ["--ease-sortie", "cubic-bezier(0.22, 1, 0.36, 1)", "motion"],
+    ["--texte", "var(--encre)", "other"],
+    ["--ombre-carte", "0 2px 8px #0003", "shadow"],
+    ["--arrondi", "6px", "radius"],
+    ["--taille-titre", "3rem", "size"],
+  ])("%s → %s", (name, value, kind) => {
+    expect(classifyToken(name, value, isColor)).toBe(kind);
   });
 });

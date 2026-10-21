@@ -1,6 +1,10 @@
 import { colorKey, isColorLiteral } from "./colors";
+import { isLibraryToken } from "./sheet-origin";
+import { walkStylesheets, type RuleContext } from "./sheet-walker";
 
-/** Une déclaration de couleur trouvée dans les feuilles de style du site. */
+export { OWN_NODE_PREFIX } from "./sheet-walker";
+
+/** Une déclaration de couleur trouvée dans les feuilles de style de la page. */
 export interface ColorDeclaration {
   wrappers: string[];
   selector: string;
@@ -15,21 +19,24 @@ export interface ColorVariable {
   key: string;
   selectors: string[];
   uses: number;
+  /** Variable d’une extension ou d’une bibliothèque, pas du site. */
+  external: boolean;
 }
 
-/** Une variable CSS du site (couleur, police, taille, arrondi…) : la matière du design system. */
+/** Une variable CSS (couleur, police, taille, arrondi…) : la matière du design system. */
 export interface DesignToken {
   name: string;
   value: string;
   selectors: string[];
   uses: number;
+  external: boolean;
 }
 
 export interface SheetScan {
   declarations: ColorDeclaration[];
   variables: ColorVariable[];
   tokens: DesignToken[];
-  /** Nombre d'utilisations de chaque couleur (clé hex), variables comprises. */
+  /** Nombre d’utilisations de chaque couleur du site (clé hex), variables comprises. */
   usage: Map<string, number>;
 }
 
@@ -49,36 +56,28 @@ const COLOR_PROPERTIES = new Set([
   "column-rule-color",
 ]);
 
-export const OWN_NODE_PREFIX = "__od";
-
-function wrapperOf(rule: CSSRule): string | null {
-  if (rule instanceof CSSMediaRule) return `@media ${rule.conditionText}`;
-  if (rule instanceof CSSSupportsRule) return `@supports ${rule.conditionText}`;
-  if (typeof CSSContainerRule !== "undefined" && rule instanceof CSSContainerRule) {
-    return `@container ${rule.containerName} ${rule.containerQuery}`.replace(/\s+/g, " ");
-  }
-  return null;
+/** Le site l’emporte : une variable définie par le site et par une bibliothèque compte comme celle du site. */
+function record<T extends { selectors: string[]; external: boolean }>(
+  map: Map<string, T>,
+  name: string,
+  create: () => T,
+  selector: string,
+  external: boolean,
+): void {
+  const entry = map.get(name) ?? create();
+  if (!entry.selectors.includes(selector)) entry.selectors.push(selector);
+  entry.external = entry.external && external;
+  map.set(name, entry);
 }
 
-function readSheetRules(sheet: CSSStyleSheet): CSSRuleList | null {
-  const owner = sheet.ownerNode;
-  if (owner instanceof Element && owner.id.startsWith(OWN_NODE_PREFIX)) return null;
-  try {
-    return sheet.cssRules;
-  } catch {
-    return null; // Feuille d'un autre domaine : illisible, on l'ignore.
-  }
-}
-
-/** Parcourt toutes les feuilles de style de la page et relève couleurs et variables de couleur. */
+/** Parcourt toutes les feuilles de style de la page et relève couleurs et variables. */
 export function scanStylesheets(doc: Document = document): SheetScan {
-  const declarations: ColorDeclaration[] = [];
+  const declarations: (ColorDeclaration & { external: boolean })[] = [];
   const variables = new Map<string, ColorVariable>();
   const tokens = new Map<string, DesignToken>();
   const references = new Map<string, number>();
 
-  const visitStyle = (rule: CSSStyleRule, wrappers: string[]): void => {
-    const style = rule.style;
+  walkStylesheets(doc, (style: CSSStyleDeclaration, selector: string, context: RuleContext) => {
     // Les raccourcis (« background: var(--x) ») ne se relisent pas via leurs propriétés détaillées.
     for (const match of style.cssText.matchAll(/var\(\s*(--[\w-]+)/g)) {
       if (match[1]) references.set(match[1], (references.get(match[1]) ?? 0) + 1);
@@ -87,47 +86,26 @@ export function scanStylesheets(doc: Document = document): SheetScan {
       const property = style.item(index);
       const value = style.getPropertyValue(property).trim();
       const isVariable = property.startsWith("--");
+      const external = context.external || (isVariable && isLibraryToken(property));
       // Les variables internes de Tailwind (--tw-…) ne sont pas des choix de design.
       if (isVariable && !property.startsWith("--tw-") && value !== "") {
-        const token = tokens.get(property) ?? { name: property, value, selectors: [], uses: 0 };
-        if (!token.selectors.includes(rule.selectorText)) token.selectors.push(rule.selectorText);
-        tokens.set(property, token);
+        record(tokens, property, () => ({ name: property, value, selectors: [], uses: 0, external }), selector, external);
       }
       if (!isVariable && !COLOR_PROPERTIES.has(property)) continue;
       if (!isColorLiteral(value)) continue;
       const key = colorKey(value);
       if (!key) continue;
-      declarations.push({ wrappers, selector: rule.selectorText, property, value, key });
+      declarations.push({ wrappers: context.wrappers, selector, property, value, key, external });
       if (!isVariable) continue;
-      const variable = variables.get(property) ?? { name: property, value, key, selectors: [], uses: 0 };
-      if (!variable.selectors.includes(rule.selectorText)) variable.selectors.push(rule.selectorText);
-      variables.set(property, variable);
+      record(variables, property, () => ({ name: property, value, key, selectors: [], uses: 0, external }), selector, external);
     }
-  };
-
-  const visit = (rules: CSSRuleList, wrappers: string[]): void => {
-    for (const rule of Array.from(rules)) {
-      if (rule instanceof CSSStyleRule) {
-        visitStyle(rule, wrappers);
-        continue;
-      }
-      const wrapper = wrapperOf(rule);
-      if (wrapper !== null || rule instanceof CSSLayerBlockRule) {
-        const nested = (rule as CSSGroupingRule).cssRules;
-        visit(nested, wrapper ? [...wrappers, wrapper] : wrappers);
-      }
-    }
-  };
-
-  for (const sheet of Array.from(doc.styleSheets)) {
-    const rules = readSheetRules(sheet);
-    if (rules) visit(rules, []);
-  }
+  });
 
   const usage = new Map<string, number>();
   for (const variable of variables.values()) variable.uses = references.get(variable.name) ?? 0;
   for (const token of tokens.values()) token.uses = references.get(token.name) ?? 0;
   for (const declaration of declarations) {
+    if (declaration.external) continue; // Les couleurs d’une extension ne sont pas celles du site.
     const weight = declaration.property.startsWith("--") ? Math.max(1, references.get(declaration.property) ?? 0) : 1;
     usage.set(declaration.key, (usage.get(declaration.key) ?? 0) + weight);
   }

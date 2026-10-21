@@ -14,7 +14,8 @@ const INITIAL_ROWS = 12;
 function VariablesSection(): JSX.Element | null {
   const [query, setQuery] = useState("");
   const [showAll, setShowAll] = useState(false);
-  const variables = sheetScan.value.variables;
+  const variables = sheetScan.value.variables.filter((variable) => !variable.external);
+  const hidden = sheetScan.value.variables.length - variables.length;
   if (variables.length === 0) return null;
   const filtered = variables.filter((variable) => matchesToken(variable.name, query));
   const shown = showAll || query ? filtered : filtered.slice(0, INITIAL_ROWS);
@@ -24,7 +25,10 @@ function VariablesSection(): JSX.Element | null {
         <span class="section-title">{t("colors.vars")}</span>
         <span class="muted">{variables.length}</span>
       </div>
-      <p class="hint">{t("colors.varsHint")}</p>
+      <p class="hint">
+        {t("colors.varsHint")}
+        {hidden > 0 && ` ${tn(hidden, "colors.hiddenExternal.one", "colors.hiddenExternal.other")}.`}
+      </p>
       {variables.length > INITIAL_ROWS && (
         <input class="input" placeholder={t("colors.varsSearch")} value={query} onInput={(e) => setQuery(e.currentTarget.value)} style="margin-bottom:6px" />
       )}

@@ -2,6 +2,7 @@ import type { JSX } from "preact";
 import { render } from "preact";
 import { startFontSync } from "./engine/font-sync";
 import { startOverrides } from "./engine/overrides";
+import { rememberInitialStyles } from "./engine/sheet-origin";
 import { startPageWatch } from "./engine/page-watch";
 import { startTextOverrides } from "./engine/text-overrides";
 import { OWN_NODE_PREFIX } from "./engine/stylesheet-scan";
@@ -52,6 +53,7 @@ function mount(): void {
 
 async function start(): Promise<void> {
   if (window.top !== window) return; // Pas dans les iframes de la page.
+  rememberInitialStyles();
   startOverrides();
   startTextOverrides();
   startPageWatch();

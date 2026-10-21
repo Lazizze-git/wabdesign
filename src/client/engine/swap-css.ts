@@ -32,7 +32,8 @@ const MAX_ELEMENTS = 4000;
 /** Couleurs réellement visibles sur la page (lues sur les éléments affichés). */
 export function visibleColors(host: Element | null): Map<string, number> {
   const counts = new Map<string, number>();
-  const elements = Array.from(document.body.querySelectorAll("*")).slice(0, MAX_ELEMENTS);
+  // <html> et <body> portent souvent le fond et la couleur du texte de toute la page.
+  const elements = [document.documentElement, document.body, ...Array.from(document.body.querySelectorAll("*")).slice(0, MAX_ELEMENTS)];
   for (const element of elements) {
     if (host?.contains(element)) continue;
     const style = getComputedStyle(element);

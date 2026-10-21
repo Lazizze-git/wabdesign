@@ -6,7 +6,7 @@ import { SYSTEM_GROUPS, type SystemSetting } from "../../engine/system-settings"
 import { createBinding, computedValue } from "../../state/binding";
 import { removeWhere } from "../../state/changes";
 import { getHost } from "../../state/ui";
-import { designTokens } from "../../state/tokens";
+import { siteTokens } from "../../state/tokens";
 import { NumberField } from "../controls/NumberField";
 import { Segmented } from "../controls/Segmented";
 import { TokensSection } from "../system/TokensSection";
@@ -74,14 +74,14 @@ function ElementSettings(): JSX.Element {
 
 /** Design system : les variables du site, et des réglages par type d’élément. */
 export function SystemTab(): JSX.Element {
-  const [view, setView] = useState<View>(designTokens.value.length > 0 ? "tokens" : "elements");
+  const [view, setView] = useState<View>(siteTokens.value.length > 0 ? "tokens" : "elements");
   return (
     <>
       <section class="section">
         <Segmented<View>
           label={t("system.view")}
           options={[
-            { value: "tokens", label: t("system.viewTokens", { n: designTokens.value.length }) },
+            { value: "tokens", label: t("system.viewTokens", { n: siteTokens.value.length }) },
             { value: "elements", label: t("system.viewElements") },
           ]}
           value={view}

@@ -4,20 +4,29 @@ import { useState } from "preact/hooks";
 import { matchesToken } from "../../engine/token-names";
 import { TOKEN_GROUPS, type TokenGroupDefinition } from "../../engine/token-kinds";
 import { removeWhere } from "../../state/changes";
-import { designTokens, tokenTarget, type ClassifiedToken } from "../../state/tokens";
+import { externalTokens, siteTokens, tokenTarget, type ClassifiedToken } from "../../state/tokens";
 import { Icon } from "../icons";
 import { TokenRow } from "./TokenRow";
 
 const PREVIEW_COUNT = 8;
+const CLOSED_BY_DEFAULT = new Set(["other", "layout", "external"]);
+
+/** Variables qui ne viennent pas du site (extensions du navigateur, bibliothèques) : rangées à part. */
+const EXTERNAL_GROUP: TokenGroupDefinition = {
+  id: "external",
+  title: "kind.external",
+  kinds: TOKEN_GROUPS.flatMap((group) => group.kinds),
+};
 
 interface GroupProps {
   group: TokenGroupDefinition;
   tokens: ClassifiedToken[];
   searching: boolean;
+  hint?: string;
 }
 
-function TokenGroup({ group, tokens, searching }: GroupProps): JSX.Element {
-  const [open, setOpen] = useState(group.id !== "other" && group.id !== "layout");
+function TokenGroup({ group, tokens, searching, hint }: GroupProps): JSX.Element {
+  const [open, setOpen] = useState(!CLOSED_BY_DEFAULT.has(group.id));
   const [showAll, setShowAll] = useState(false);
   const expanded = open || searching;
   const shown = showAll || searching ? tokens : tokens.slice(0, PREVIEW_COUNT);
@@ -40,6 +49,7 @@ function TokenGroup({ group, tokens, searching }: GroupProps): JSX.Element {
           </button>
         )}
       </div>
+      {expanded && hint && <p class="hint">{hint}</p>}
       {expanded && (
         <div class="stack">
           {shown.map((token) => (
@@ -60,20 +70,27 @@ function TokenGroup({ group, tokens, searching }: GroupProps): JSX.Element {
 export function TokensSection(): JSX.Element {
   const [query, setQuery] = useState("");
   const search = query.trim().toLowerCase();
-  const tokens = designTokens.value.filter((token) => matchesToken(token.name, search));
+  const tokens = siteTokens.value.filter((token) => matchesToken(token.name, search));
+  const foreign = externalTokens.value.filter((token) => matchesToken(token.name, search));
+  const foreignGroup = foreign.length > 0 && (
+    <TokenGroup group={EXTERNAL_GROUP} tokens={foreign} searching={false} hint={t("system.externalHint")} />
+  );
 
-  if (designTokens.value.length === 0) {
+  if (siteTokens.value.length === 0) {
     return (
-      <section class="section">
-        <p class="hint" style="margin:0">{t("system.noTokens")}</p>
-      </section>
+      <>
+        <section class="section">
+          <p class="hint" style="margin:0">{t("system.noTokens")}</p>
+        </section>
+        {foreignGroup}
+      </>
     );
   }
 
   return (
     <>
       <section class="section stack">
-        <p class="hint" style="margin:0">{t("system.tokensHint", { n: designTokens.value.length })}</p>
+        <p class="hint" style="margin:0">{t("system.tokensHint", { n: siteTokens.value.length })}</p>
         <input class="input" placeholder={t("system.search")} value={query} onInput={(e) => setQuery(e.currentTarget.value)} />
       </section>
       {TOKEN_GROUPS.map((group) => {
@@ -82,6 +99,7 @@ export function TokensSection(): JSX.Element {
         return <TokenGroup key={group.id} group={group} tokens={items} searching={search !== ""} />;
       })}
       {tokens.length === 0 && <p class="empty">{t("system.noMatch")}</p>}
+      {foreignGroup}
     </>
   );
 }

@@ -12,6 +12,7 @@ export type TokenKind =
   | "spacing"
   | "shadow"
   | "layout"
+  | "motion"
   | "other";
 
 export interface TokenGroupDefinition {
@@ -27,6 +28,7 @@ export const TOKEN_GROUPS: readonly TokenGroupDefinition[] = [
   { id: "spacing", title: "kind.spacing", kinds: ["spacing"] },
   { id: "shadow", title: "kind.shadow", kinds: ["shadow"] },
   { id: "layout", title: "kind.layout", kinds: ["layout"] },
+  { id: "motion", title: "kind.motion", kinds: ["motion"] },
   { id: "other", title: "kind.other", kinds: ["other"] },
 ];
 
@@ -43,16 +45,18 @@ function isLength(value: string): boolean {
 export function classifyToken(name: string, value: string, isColor: (value: string) => boolean): TokenKind {
   const n = name.toLowerCase();
   const v = value.trim();
+  // Noms anglais et français : --shadow / --ombre, --gutter / --gouttiere, --width / --largeur…
   if (isColor(v)) return "color";
-  if (/shadow/.test(n)) return "shadow";
-  if (/weight/.test(n)) return "weight";
-  if (/leading|line-height|lineheight/.test(n)) return "leading";
-  if (/tracking|letter-spacing|letterspacing/.test(n)) return "tracking";
-  if (/radius|rounded/.test(n)) return "radius";
-  if (/(^--font|family|typeface)/.test(n) && !isLength(v)) return "font";
-  if (/container|breakpoint|screen|max-w|width|height|aspect/.test(n)) return "layout";
-  if (/spacing|space|gap|gutter|padding|margin|inset/.test(n)) return "spacing";
-  if (/(^--text|font-size|fontsize|^--fs|size|heading|^--h[1-6]$)/.test(n)) return "size";
+  if (/shadow|ombre/.test(n)) return "shadow";
+  if (/weight|graisse/.test(n)) return "weight";
+  if (/leading|line-height|lineheight|interligne/.test(n)) return "leading";
+  if (/tracking|letter-spacing|letterspacing|interlettrage|approche/.test(n)) return "tracking";
+  if (/radius|rounded|arrondi|rayon/.test(n)) return "radius";
+  if (/(^--font|family|typeface|^--police|^--typo)/.test(n) && !isLength(v)) return "font";
+  if (/ease|duration|delay|transition|courbe|duree|durée|delai|délai|vitesse|^--speed/.test(n)) return "motion";
+  if (/container|breakpoint|screen|max-w|width|height|aspect|ratio|largeur|hauteur|colonne|^--cols|^--rows/.test(n)) return "layout";
+  if (/spacing|space|gap|gutter|padding|margin|inset|gouttiere|gouttière|espace|marge/.test(n)) return "spacing";
+  if (/(^--text(-|$)|font-size|fontsize|^--fs|size|taille|heading|^--h[1-6]$)/.test(n)) return "size";
   return "other";
 }
 

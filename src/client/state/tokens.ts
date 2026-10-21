@@ -19,6 +19,10 @@ export const designTokens = computed<ClassifiedToken[]>(() =>
     .sort((a, b) => b.uses - a.uses || a.name.localeCompare(b.name, "fr", { numeric: true })),
 );
 
+/** Variables du site seulement, et variables venues d’ailleurs (extensions, bibliothèques). */
+export const siteTokens = computed(() => designTokens.value.filter((token) => !token.external));
+export const externalTokens = computed(() => designTokens.value.filter((token) => token.external));
+
 /** La retouche vise toutes les règles où la variable est définie (ex. :root et .dark). */
 export function tokenTarget(token: Pick<DesignToken, "name" | "selectors">): Target {
   return { selector: token.selectors.join(", "), label: token.name, scope: "global", context: null };
@@ -31,8 +35,22 @@ export function findToken(name: string): DesignToken | undefined {
 /** Valeur d'origine lisible : si la variable renvoie vers une autre (var(--x)), on montre le résultat. */
 export function resolvedValue(token: DesignToken): string {
   if (!token.value.includes("var(")) return token.value;
-  const computedValue = getComputedStyle(document.documentElement).getPropertyValue(token.name).trim();
-  return computedValue || token.value;
+  // La variable peut être définie sur une classe (.univers) plutôt qu’à la racine : on la lit
+  // sur un élément où elle s’applique vraiment.
+  for (const element of [...token.selectors.map(firstMatch), document.documentElement]) {
+    if (!element) continue;
+    const computedValue = getComputedStyle(element).getPropertyValue(token.name).trim();
+    if (computedValue && !computedValue.includes("var(")) return computedValue;
+  }
+  return token.value;
+}
+
+function firstMatch(selector: string): Element | null {
+  try {
+    return document.querySelector(selector);
+  } catch {
+    return null;
+  }
 }
 
 export function tokenChange(token: DesignToken): Change | undefined {
