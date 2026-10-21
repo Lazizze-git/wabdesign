@@ -100,6 +100,8 @@ export interface Pairing {
 
 export interface Config {
   language: LanguageSetting;
+  /** L’introduction du premier lancement a été vue. */
+  onboarded: boolean;
   fontFolders: string[];
   googleFonts: boolean;
   palettes: Palette[];

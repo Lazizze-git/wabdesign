@@ -49,7 +49,7 @@ export function BoxSpacing({ binding, kind, title }: BoxSpacingProps): JSX.Eleme
         </button>
       </div>
       {linked ? (
-        <NumberField label={t("box.allSides")} property={`${kind}-top`} value={values[0] ?? "0px"} units={["px", "rem", "em", "%"]} min={min} onChange={setAll} />
+        <NumberField label={t("box.allSides")} property={`${kind}-top`} value={values[0] ?? "0px"} units={["px", "rem", "em", "%"]} min={min} changed={changed} onReset={() => SIDES.forEach(({ side }) => binding.reset(`${kind}-${side}`))} onChange={setAll} />
       ) : (
         <div class="grid-2">
           {SIDES.map(({ side, label }, index) => (
@@ -61,6 +61,7 @@ export function BoxSpacing({ binding, kind, title }: BoxSpacingProps): JSX.Eleme
               units={["px", "rem", "em", "%"]}
               min={min}
               changed={binding.isChanged(`${kind}-${side}`)}
+              onReset={() => binding.reset(`${kind}-${side}`)}
               onChange={(value) => binding.set(`${kind}-${side}`, value)}
             />
           ))}

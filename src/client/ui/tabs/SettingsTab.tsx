@@ -5,6 +5,7 @@ import { api } from "../../api";
 import { languageSetting, t, tn } from "../../i18n";
 import { config, fonts, fontsLoading, loadFonts, status, updateConfig } from "../../state/library";
 import { notify } from "../../state/toasts";
+import { welcomeRequested } from "../../state/ui";
 import { Segmented } from "../controls/Segmented";
 import { Icon } from "../icons";
 
@@ -142,6 +143,11 @@ export function SettingsTab(): JSX.Element {
         </label>
       </section>
       <ShortcutsSection />
+      <section class="section">
+        <button type="button" class="btn btn-block" onClick={() => (welcomeRequested.value = true)}>
+          {t("welcome.again")}
+        </button>
+      </section>
       {status.value && (
         <section class="section">
           <p class="hint mono" style="margin:0">

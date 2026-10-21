@@ -1,3 +1,4 @@
+import { ResetButton } from "../controls/ResetButton";
 import { t } from "../../i18n";
 import type { JSX } from "preact";
 import type { FontFamily } from "../../../shared/types";
@@ -10,10 +11,11 @@ interface WeightControlProps {
   changed: boolean;
   onWeight: (weight: number) => void;
   onItalic: (italic: boolean) => void;
+  onReset?: () => void;
 }
 
 /** Graisse : curseur continu pour une police variable, sinon les graisses qui existent vraiment. */
-export function WeightControl({ family, weight, italic, changed, onWeight, onItalic }: WeightControlProps): JSX.Element {
+export function WeightControl({ family, weight, italic, changed, onWeight, onItalic, onReset }: WeightControlProps): JSX.Element {
   const range = family?.faces.find((face) => face.weightRange)?.weightRange ?? null;
   const styleFaces = family?.faces.filter((face) => (face.style === "italic") === italic) ?? [];
   const weights = [...new Set((styleFaces.length > 0 ? styleFaces : (family?.faces ?? [])).map((face) => face.weight))];
@@ -22,8 +24,12 @@ export function WeightControl({ family, weight, italic, changed, onWeight, onIta
 
   return (
     <div class="field">
-      <span class="label">
-        {t("type.weight")}{changed && <span class="changed"> •</span>}
+      <span class="label label-row">
+        <span>
+          {t("type.weight")}
+          {changed && <span class="changed"> •</span>}
+        </span>
+        {changed && onReset && <ResetButton onReset={onReset} label={t("type.weight")} />}
       </span>
       <div class="row">
         {range ? (

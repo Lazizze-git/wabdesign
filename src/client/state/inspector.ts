@@ -1,7 +1,7 @@
 import { t } from "../i18n";
 import { computed, signal } from "@preact/signals";
 import type { Target, TargetScope } from "../../shared/types";
-import { countMatches, describeElement, humanLabel, similarSelector, uniqueSelector } from "../engine/selector";
+import { countMatches, describeElement, elementPlural, humanLabel, similarSelector, uniqueSelector } from "../engine/selector";
 import { pageVersion } from "../engine/page-watch";
 import { getHost } from "./ui";
 
@@ -25,9 +25,12 @@ export function scopeOptions(element: Element): ScopeOption[] {
   const similar = similarSelector(element);
   const similarCount = similar ? countMatches(similar) : 0;
   if (similar && similarCount > 1) {
-    options.push({ scope: "similar", selector: similar, label: t("inspect.scopeSimilar"), count: similarCount });
+    options.push({ scope: "similar", selector: similar, label: t("inspect.scopeSimilar", { n: similarCount }), count: similarCount });
   }
-  options.push({ scope: "tag", selector: tag, label: t("inspect.scopeTag", { tag }), count: countMatches(tag) });
+  const plural = elementPlural(element);
+  const tagCount = countMatches(tag);
+  const tagLabel = plural ? t("inspect.scopeTagNamed", { name: plural, n: tagCount }) : t("inspect.scopeTag", { tag, n: tagCount });
+  options.push({ scope: "tag", selector: tag, label: tagLabel, count: tagCount });
   return options;
 }
 

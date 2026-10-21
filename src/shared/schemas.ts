@@ -43,6 +43,7 @@ const hexOrCss = z.string().min(1).max(100);
 
 export const configSchema = z.object({
   language: z.enum(["auto", "fr", "en"]).default("auto"),
+  onboarded: z.boolean().default(false),
   fontFolders: z.array(z.string().min(1).max(1000)).max(50),
   googleFonts: z.boolean(),
   palettes: z
@@ -81,6 +82,7 @@ export const validateSchema = z.object({
 
 export const DEFAULT_CONFIG: z.infer<typeof configSchema> = {
   language: "auto",
+  onboarded: false,
   fontFolders: [],
   googleFonts: true,
   palettes: [],

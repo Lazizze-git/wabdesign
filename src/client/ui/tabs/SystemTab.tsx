@@ -36,6 +36,7 @@ function SettingField({ setting }: { setting: SystemSetting }): JSX.Element | nu
       step={setting.step ?? 1}
       min={setting.min}
       changed={changed}
+      onReset={() => binding.reset(setting.property)}
       onChange={(value) => binding.set(setting.property, value)}
     />
   );

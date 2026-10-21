@@ -25,6 +25,8 @@ const stored = readStored();
 export const activeTab = signal<TabId>(stored.tab ?? "fonts");
 export const minimized = signal(stored.minimized ?? false);
 export const hidden = signal(stored.hidden ?? false);
+/** Demande explicite de revoir l’introduction (depuis les réglages). */
+export const welcomeRequested = signal(false);
 /** Position du panneau quand on l'a déplacé (sinon : en haut à droite). */
 export const position = signal<{ x: number; y: number } | null>(stored.position ?? null);
 

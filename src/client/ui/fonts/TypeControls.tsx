@@ -1,3 +1,4 @@
+import { ResetButton } from "../controls/ResetButton";
 import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
@@ -54,8 +55,12 @@ export function TypeControls({ binding, title, showSize = false }: TypeControlsP
   return (
     <div class="stack">
       <div class="field">
-        <span class="label">
-          {t("type.font")}{binding.isChanged("font-family") && <span class="changed"> •</span>}
+        <span class="label label-row">
+          <span>
+            {t("type.font")}
+            {binding.isChanged("font-family") && <span class="changed"> •</span>}
+          </span>
+          {binding.isChanged("font-family") && <ResetButton onReset={() => binding.reset("font-family")} label={t("type.font")} />}
         </span>
         <button type="button" class="picker-btn" onClick={() => setPicking(true)}>
           <span class="font-name" style={{ fontFamily: familyCss, fontSize: "15px" }}>
@@ -71,6 +76,10 @@ export function TypeControls({ binding, title, showSize = false }: TypeControlsP
         changed={binding.isChanged("font-weight") || binding.isChanged("font-style")}
         onWeight={(next) => binding.set("font-weight", String(next))}
         onItalic={setItalic}
+        onReset={() => {
+          binding.reset("font-weight");
+          binding.reset("font-style");
+        }}
       />
       {family && (
         <AxesControl
@@ -82,12 +91,12 @@ export function TypeControls({ binding, title, showSize = false }: TypeControlsP
       <div class="grid-2">
         {showSize && (
           <NumberField label={t("type.size")} property="font-size" value={binding.get("font-size")} units={["px", "rem", "em"]} min={1}
-            changed={binding.isChanged("font-size")} onChange={(value) => binding.set("font-size", value)} />
+            changed={binding.isChanged("font-size")} onReset={() => binding.reset("font-size")} onChange={(value) => binding.set("font-size", value)} />
         )}
         <NumberField label={t("type.lineHeight")} property="line-height" value={lineHeightValue(binding)} units={["", "px", "em"]} step={0.05} min={0}
-          changed={binding.isChanged("line-height")} onChange={(value) => binding.set("line-height", value)} />
+          changed={binding.isChanged("line-height")} onReset={() => binding.reset("line-height")} onChange={(value) => binding.set("line-height", value)} />
         <NumberField label={t("type.letterSpacing")} property="letter-spacing" value={letterSpacingValue(binding)} units={["em", "px"]} step={0.005}
-          changed={binding.isChanged("letter-spacing")} onChange={(value) => binding.set("letter-spacing", value)} />
+          changed={binding.isChanged("letter-spacing")} onReset={() => binding.reset("letter-spacing")} onChange={(value) => binding.set("letter-spacing", value)} />
       </div>
       <Segmented label={t("type.case")} options={CASES} value={CASES.some((c) => c.value === textCase) ? textCase : "none"}
         onChange={(value) => binding.set("text-transform", value)} />

@@ -1,3 +1,4 @@
+import { ResetButton } from "./ResetButton";
 import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useRef, useState } from "preact/hooks";
@@ -14,6 +15,8 @@ interface NumberFieldProps {
   changed?: boolean;
   /** Nom technique affiché discrètement à droite du libellé (ex. --radius). */
   code?: string;
+  /** Affiche ↺ quand le réglage est modifié, pour revenir à la valeur d’origine. */
+  onReset?: () => void;
   onChange: (value: string) => void;
 }
 
@@ -26,7 +29,7 @@ function clamp(value: number, min: number | undefined, max: number | undefined):
  * ou on fait glisser l'étiquette vers la gauche ou la droite.
  */
 export function NumberField(props: NumberFieldProps): JSX.Element {
-  const { label, property, value, units, step = 1, min, max, changed = false, code, onChange } = props;
+  const { label, property, value, units, step = 1, min, max, changed = false, code, onReset, onChange } = props;
   const parsed = parseLength(value);
   const shown = parsed ? String(roundTo(parsed.value, parsed.unit === "px" || parsed.unit === "" ? 2 : 3)) : value;
   // null = on n'est pas en train de taper : le champ affiche toujours la valeur réelle.
@@ -95,6 +98,7 @@ export function NumberField(props: NumberFieldProps): JSX.Element {
             {label}
             {changed && <span class="changed"> •</span>}
           </span>
+          {changed && onReset && <ResetButton onReset={onReset} label={label} />}
           {code && <span class="label-code">{code}</span>}
         </span>
       </span>

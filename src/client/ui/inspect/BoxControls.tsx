@@ -34,15 +34,15 @@ export function BoxControls({ binding }: { binding: StyleBinding }): JSX.Element
         <span class="section-title">{t("box.shape")}</span>
         <div class="grid-2">
           <NumberField label={t("box.radius")} property="border-radius" value={binding.get("border-top-left-radius")} units={["px", "rem", "%"]} min={0}
-            changed={binding.isChanged("border-radius")} onChange={(value) => binding.set("border-radius", value)} />
+            changed={binding.isChanged("border-radius")} onReset={() => binding.reset("border-radius")} onChange={(value) => binding.set("border-radius", value)} />
           <NumberField label={t("box.border")} property="border-width" value={binding.get("border-top-width")} units={["px"]} min={0}
-            changed={binding.isChanged("border-width")} onChange={(value) => {
+            changed={binding.isChanged("border-width")} onReset={() => (binding.reset("border-width"), binding.reset("border-style"))} onChange={(value) => {
               binding.set("border-width", value);
               if (!binding.isChanged("border-style") && binding.get("border-top-style") === "none") binding.set("border-style", "solid");
             }} />
           {hasBorder && color(t("box.borderColor"), "border-color")}
           <NumberField label={t("box.opacity")} property="opacity" value={binding.get("opacity")} units={[""]} step={0.05} min={0} max={1}
-            changed={binding.isChanged("opacity")} onChange={(value) => binding.set("opacity", value)} />
+            changed={binding.isChanged("opacity")} onReset={() => binding.reset("opacity")} onChange={(value) => binding.set("opacity", value)} />
         </div>
       </section>
       <section class="section stack">
@@ -51,7 +51,7 @@ export function BoxControls({ binding }: { binding: StyleBinding }): JSX.Element
         <BoxSpacing binding={binding} kind="margin" title={t("box.margin")} />
         {isLayout && (
           <NumberField label={t("box.gap")} property="gap" value={binding.get("row-gap")} units={["px", "rem", "em"]} min={0}
-            changed={binding.isChanged("gap")} onChange={(value) => binding.set("gap", value)} />
+            changed={binding.isChanged("gap")} onReset={() => binding.reset("gap")} onChange={(value) => binding.set("gap", value)} />
         )}
       </section>
     </>

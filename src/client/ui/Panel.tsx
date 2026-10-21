@@ -12,6 +12,9 @@ import { InspectTab } from "./tabs/InspectTab";
 import { SettingsTab } from "./tabs/SettingsTab";
 import { SystemTab } from "./tabs/SystemTab";
 import { ValidateSheet } from "./ValidateSheet";
+import { Welcome, welcomeSeenLocally } from "./Welcome";
+import { config } from "../state/library";
+import { welcomeRequested } from "../state/ui";
 
 const TABS: readonly { id: Exclude<TabId, "settings">; label: MessageKey }[] = [
   { id: "fonts", label: "tab.fonts" },
@@ -65,6 +68,8 @@ export function Panel(): JSX.Element {
   const onDrag = useDrag();
   const count = changes.value.length;
   const Content = CONTENT[activeTab.value];
+  const firstTime = config.value !== null && !config.value.onboarded && !welcomeSeenLocally();
+  const showWelcome = welcomeRequested.value || firstTime;
 
   if (minimized.value) {
     return (
@@ -121,6 +126,7 @@ export function Panel(): JSX.Element {
         </button>
       </div>
       {validating && <ValidateSheet onClose={() => setValidating(false)} />}
+      {showWelcome && <Welcome onClose={() => (welcomeRequested.value = false)} />}
       <div class="toasts" aria-live="polite">
         {toasts.value.map((toast) => (
           <div key={toast.id} class={`toast ${toast.tone}`}>

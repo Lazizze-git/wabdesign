@@ -1,3 +1,5 @@
+import { propertyLabel } from "../../engine/property-names";
+import { friendlyTokenName } from "../../engine/token-names";
 import { t, type MessageKey } from "../../i18n";
 import type { JSX } from "preact";
 import { changeKey } from "../../../shared/css";
@@ -17,9 +19,16 @@ const GROUPS: readonly { group: ChangeGroup; title: MessageKey }[] = [
   { group: "text", title: "changes.text" },
 ];
 
+function changeTitle(change: Change): string {
+  if (change.group === "swap") return t("changes.colorTitle", { color: change.previous ?? "" });
+  if (change.group === "vars") return friendlyTokenName(change.property);
+  return change.target.label;
+}
+
 function ChangeItem({ change }: { change: Change }): JSX.Element {
   const highlightable = ["inspect", "system", "fonts", "text"].includes(change.group);
   const isColor = change.group === "swap" || (change.group !== "text" && colorKey(change.value) !== null);
+  const showProperty = change.group !== "swap" && change.group !== "vars";
   return (
     <div
       class="change-item"
@@ -27,15 +36,15 @@ function ChangeItem({ change }: { change: Change }): JSX.Element {
       onMouseLeave={() => (highlightSelector.value = null)}
     >
       <div class="grow" style="min-width:0">
-        <div class="truncate">{change.group === "swap" ? `${change.previous ?? ""}` : change.target.label}</div>
-        <div class="row muted mono" style="gap:4px">
+        <div class="truncate change-title">{changeTitle(change)}</div>
+        <div class="row" style="gap:4px">
+          {showProperty && <span class="truncate">{propertyLabel(change)}</span>}
           {change.group === "text" && <span class="truncate">{t("changes.quoted", { text: change.value })}</span>}
-          {change.group !== "swap" && change.group !== "text" && <span class="truncate">{change.property}</span>}
           {isColor && change.previous && <Swatch color={change.previous} />}
           {isColor && <span class="arrow">→</span>}
           {isColor && <Swatch color={change.value} />}
-          {!isColor && change.group !== "text" && <span class="truncate">→ {change.font?.family ?? change.value}</span>}
-          {isColor && <span class="truncate">{change.value}</span>}
+          {isColor && <span class="truncate mono">{change.value}</span>}
+          {!isColor && change.group !== "text" && <span class="truncate mono">→ {change.font?.family ?? change.value}</span>}
         </div>
       </div>
       <button type="button" class="icon-btn sm" onClick={() => removeChange(changeKey(change))} aria-label={t("changes.remove")}>

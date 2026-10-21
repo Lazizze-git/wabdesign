@@ -1,3 +1,4 @@
+import { ResetButton } from "../controls/ResetButton";
 import { t } from "../../i18n";
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
@@ -13,7 +14,6 @@ import { ColorTargetRow } from "../colors/ColorTargetRow";
 import { NumberField } from "../controls/NumberField";
 import { TextField } from "../controls/TextField";
 import { FontSheet } from "../fonts/FontSheet";
-import { Icon } from "../icons";
 
 function FontTokenRow({ token, value }: { token: ClassifiedToken; value: string }): JSX.Element {
   const [picking, setPicking] = useState(false);
@@ -29,6 +29,7 @@ function FontTokenRow({ token, value }: { token: ClassifiedToken; value: string 
           {friendlyTokenName(token.name)}
           {tokenChange(token) && <span class="changed"> •</span>}
         </span>
+        {tokenChange(token) && <ResetButton onReset={() => resetToken(token)} label={friendlyTokenName(token.name)} />}
         <span class="label-code">{token.name}</span>
       </span>
       <button type="button" class="picker-btn" onClick={() => setPicking(true)}>
@@ -67,7 +68,7 @@ export function TokenRow({ token }: { token: ClassifiedToken }): JSX.Element {
   if (sources.length > 0) {
     return (
       <div class="stack" style="gap:2px">
-        <TextField label={friendlyTokenName(token.name)} code={token.name} value={change?.value ?? token.value} changed={changed} onChange={(next) => setToken(token, next)} />
+        <TextField label={friendlyTokenName(token.name)} code={token.name} value={change?.value ?? token.value} changed={changed} onReset={() => resetToken(token)} onChange={(next) => setToken(token, next)} />
         <span class="hint" style="margin:0">
           {t("system.derived", { sources: sources.join(", "), value: original })}
         </span>
@@ -85,22 +86,18 @@ export function TokenRow({ token }: { token: ClassifiedToken }): JSX.Element {
       step={stepFor(value, token.kind)}
       min={token.kind === "tracking" ? undefined : 0}
       changed={changed}
+      onReset={() => resetToken(token)}
       onChange={(next) => setToken(token, next)}
     />
   ) : (
-    <TextField label={friendlyTokenName(token.name)} code={token.name} value={value} changed={changed} onChange={(next) => setToken(token, next)} />
+    <TextField
+      label={friendlyTokenName(token.name)}
+      code={token.name}
+      value={value}
+      changed={changed}
+      onReset={() => resetToken(token)}
+      onChange={(next) => setToken(token, next)}
+    />
   );
-
-  return (
-    <div class="row" style="align-items:flex-end">
-      <div class="grow" style="min-width:0">
-        {control}
-      </div>
-      {changed && (
-        <button type="button" class="icon-btn" onClick={() => resetToken(token)} title={t("system.resetTo", { value: original })} aria-label={t("common.reset")}>
-          <Icon name="undo" size={14} />
-        </button>
-      )}
-    </div>
-  );
+  return control;
 }

@@ -49,7 +49,7 @@ button { cursor: pointer; }
 .hint { margin: 0 0 8px; font-size: 12px; }
 .empty { padding: 24px 14px; text-align: center; }
 /* minmax(0, …) : un texte long ne peut jamais élargir une colonne au-delà du panneau. */
-.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.stack { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 10px; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .row { display: flex; align-items: center; gap: 6px; }
 .grow { flex: 1; min-width: 0; }
@@ -57,12 +57,12 @@ button { cursor: pointer; }
 .muted { font-weight: 500; }
 .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
 
-.panel, .minimized, .sheet { background: var(--glass); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); }
+.panel, .minimized { background: var(--glass); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .panel, .minimized, .sheet { background: var(--frame); }
+  .panel, .minimized { background: var(--frame); }
 }
 @media (prefers-reduced-transparency: reduce) {
-  .panel, .minimized, .sheet { background: var(--frame); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .panel, .minimized { background: var(--frame); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 
 .minimized {

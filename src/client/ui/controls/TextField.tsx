@@ -1,3 +1,4 @@
+import { ResetButton } from "./ResetButton";
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { isSafeCss } from "../../../shared/css";
@@ -8,11 +9,12 @@ interface TextFieldProps {
   changed?: boolean;
   /** Nom technique affiché discrètement à droite du libellé. */
   code?: string;
+  onReset?: () => void;
   onChange: (value: string) => void;
 }
 
 /** Valeur CSS libre (ombre, durée, calc()…), enregistrée quand on valide ou quitte le champ. */
-export function TextField({ label, value, changed = false, code, onChange }: TextFieldProps): JSX.Element {
+export function TextField({ label, value, changed = false, code, onReset, onChange }: TextFieldProps): JSX.Element {
   // null = pas de saisie en cours : le champ affiche toujours la valeur réelle.
   const [draft, setDraft] = useState<string | null>(null);
 
@@ -29,6 +31,7 @@ export function TextField({ label, value, changed = false, code, onChange }: Tex
           {label}
           {changed && <span class="changed"> •</span>}
         </span>
+        {changed && onReset && <ResetButton onReset={onReset} label={label} />}
         {code && <span class="label-code">{code}</span>}
       </span>
       <input
