@@ -14,7 +14,7 @@ export const controlsCss = `
 .icon-btn[aria-pressed="true"] { background: var(--well-hi); color: var(--accent); }
 .icon-btn.sm { width: 24px; height: 24px; }
 
-.field { display: grid; gap: 4px; min-width: 0; }
+.field { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; min-width: 0; }
 .label { font-size: 12px; font-weight: 500; user-select: none; }
 .label.scrub { cursor: ew-resize; }
 .changed { color: var(--accent); font-weight: 700; }
@@ -47,7 +47,7 @@ input[type="range"] { width: 100%; }
 
 .color-row { display: flex; align-items: center; gap: 8px; width: 100%; padding: 4px; border: 0; background: none; border-radius: var(--radius); text-align: left; }
 .color-row.boxed { background: var(--well); border: 1px solid var(--edge); }
-.color-text { display: grid; min-width: 0; line-height: 1.3; }
+.color-text { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; line-height: 1.3; }
 .color-label { font-weight: 500; }
 .color-sub { font-size: 12px; }
 .label-row { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
@@ -72,7 +72,7 @@ input[type="range"] { width: 100%; }
 .picker-btn { display: flex; align-items: center; gap: 8px; width: 100%; height: 38px; padding: 0 10px; background: var(--well); border: 1px solid var(--edge); border-radius: var(--radius); text-align: left; }
 
 .change-item { display: flex; gap: 8px; align-items: flex-start; padding: 6px; border-radius: var(--radius); }
-.log { display: grid; gap: 4px; max-height: 220px; overflow-y: auto; background: var(--well); border: 1px solid var(--edge); border-radius: var(--radius); padding: 10px; }
+.log { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; overflow-wrap: anywhere; max-height: 220px; overflow-y: auto; background: var(--well); border: 1px solid var(--edge); border-radius: var(--radius); padding: 10px; }
 .log-line { color: var(--ink-2); }
 .log-line.done { color: var(--ok); font-weight: 600; }
 .log-line.error { color: var(--danger); font-weight: 600; }
